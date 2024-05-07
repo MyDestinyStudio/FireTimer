@@ -1,0 +1,200 @@
+package my.destinyStudio.firetimer.screens.timerscreen
+
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import my.destinyStudio.firetimer.data.WorkOutDetail
+
+class TimerBViewModel: ViewModel() {
+
+    private var _playingWorkout = MutableStateFlow<WorkOutDetail?>  (null)
+    val playingWorkout: StateFlow<WorkOutDetail?> = _playingWorkout .asStateFlow()
+
+    private  var timeTotalList by mutableLongStateOf(  0L    )
+
+
+    // Timer State
+    private var _isTimerRunning = MutableStateFlow(true)
+    var isTimerRunning: StateFlow<Boolean> = _isTimerRunning.asStateFlow()
+
+    private val _pausedTime = MutableStateFlow<Long?>(null)
+    private val pausedTime = _pausedTime.asStateFlow()
+
+//  private val rang =     0 to  playingWorkout.value.workOutPrimaryDetail.size-1
+
+    private val tic = 20L
+
+    private var value =  MutableStateFlow (0f)
+
+    val outer: StateFlow<Float> = value .asStateFlow()
+
+    private var value1 =  MutableStateFlow (0f)
+
+    val inner : StateFlow<Float> = value1.asStateFlow()
+
+
+
+    private  var i =   MutableStateFlow (0)
+    val index : StateFlow<Int> =  i.asStateFlow()
+
+    private var currentTime =  MutableStateFlow  (0L)
+    val curTe: StateFlow<Long> = currentTime.asStateFlow()
+
+
+
+
+    private var goingForward =  MutableStateFlow  (true)
+    val isN: StateFlow<Boolean> =goingForward.asStateFlow()
+
+
+
+
+    private  var exercisesTotalTime by   mutableLongStateOf(timeTotalList)
+
+
+    private var _showAlert=  MutableStateFlow  (false)
+    val showAlert: StateFlow<Boolean> =_showAlert.asStateFlow()
+
+
+
+
+
+
+    private var startTime by   mutableLongStateOf(0L)
+
+
+
+
+
+    private val _elapsedTime = MutableStateFlow(0L)
+
+
+    private var elapsedTime  by   mutableLongStateOf(0L)
+
+
+    private var job: Job? = null
+    fun startTimer()  = viewModelScope.launch  (Dispatchers.IO){
+        if (job?.isActive == true) return@launch // Already running
+
+        _isTimerRunning.value = true
+        if (pausedTime.value != null) {
+            // Resume from paused time
+            val pausedDuration = System.currentTimeMillis() - pausedTime.value!!
+            startTime += pausedDuration
+            _pausedTime.value = null // Reset pausedTime
+        } else {
+
+            startTime = System.currentTimeMillis()
+        }
+
+        playingWorkout.value?.let {
+
+                workout ->
+            timeTotalList = workout.workOutPrimaryDetail.sumOf { it.intervalDuration }
+            Log.d("A","Start")
+            job = viewModelScope.launch {
+
+                while (isTimerRunning.value) {
+                    try {
+
+
+                        elapsedTime = System.currentTimeMillis() - startTime
+                        currentTime.value = workout.workOutPrimaryDetail[i.value].intervalDuration - elapsedTime
+
+                        exercisesTotalTime= workout.workOutPrimaryDetail.subList(i.value,
+                            playingWorkout.value!!.workOutPrimaryDetail.size).sumOf { it.intervalDuration } - elapsedTime
+
+                        value.value = currentTime.value / workout.workOutPrimaryDetail[i.value].intervalDuration.toFloat()
+                        value1.value = exercisesTotalTime / timeTotalList.toFloat()
+
+
+
+                        if ( currentTime.value == 0L || currentTime.value < 0L ) {
+                            i.value++
+                            startTime = System.currentTimeMillis()
+                            _elapsedTime.value = System.currentTimeMillis() - startTime
+                            currentTime.value = workout.workOutPrimaryDetail[i.value].intervalDuration
+                        }
+
+
+
+                        delay(tic)
+                    } catch (e: IndexOutOfBoundsException) {
+                        _isTimerRunning.value = false
+                        _showAlert.value =true
+                    }
+
+                }
+            }
+            // ... other operations ...
+        }
+
+
+
+
+    }
+
+
+    fun pauseTimer()= viewModelScope.launch  (Dispatchers.IO) {
+
+        _pausedTime.value = System.currentTimeMillis()
+        _isTimerRunning.value = false
+        job?.cancel()
+
+
+        Log.d("T","isPause" )
+    }
+
+    fun resetTimer()= viewModelScope.launch  (Dispatchers.IO)  {
+        job?.cancel()
+        _playingWorkout.value =  null
+        _isTimerRunning.value=false
+        _showAlert.value=false
+        _pausedTime.value =  null
+        _elapsedTime.value=0
+        currentTime.value=0
+        value.value=0f
+        value1.value=0f
+        i.value=0
+Log.d("T","reset B")
+
+    }
+    fun nextInterval()= viewModelScope.launch  (Dispatchers.IO)  {
+        job?.cancel()
+        i.value++
+        goingForward.value=true
+        startTimer()
+
+
+    }
+    fun previousInterval()= viewModelScope.launch  (Dispatchers.IO)  {
+        job?.cancel()
+        i.value--
+        goingForward.value=false
+        startTimer()
+
+    }
+
+
+
+
+
+    fun retrieveW(w: WorkOutDetail)=viewModelScope.launch (Dispatchers.IO){
+
+        _playingWorkout.value = w
+
+
+    }
+
+
+}
