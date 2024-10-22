@@ -1,10 +1,14 @@
 package my.destinyStudio.firetimer.screens.timerscreen
 
+import android.annotation.SuppressLint
+import android.app.Application
+import android.media.AudioAttributes
+import android.media.SoundPool
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import my.destinyStudio.firetimer.R
 import my.destinyStudio.firetimer.data.WorkOutDetail
 import my.destinyStudio.firetimer.repository.WorkoutsRepository
 import javax.inject.Inject
@@ -21,7 +26,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 
-class TimerAViewModel  @Inject constructor(private val repository: WorkoutsRepository):ViewModel() {
+class TimerAViewModel  @Inject constructor(private val repository: WorkoutsRepository,application: Application) :
+    AndroidViewModel(application){
+
+    @SuppressLint("StaticFieldLeak")
+    private val context = application.applicationContext
+
+    private val  soundPool = SoundPool.Builder()
+        .setMaxStreams(1)  // Maximum concurrent streams
+        .setAudioAttributes(  AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+        )
+        .build()
+
 
 
     private var _playingWorkout = MutableStateFlow<WorkOutDetail?>  (null)
@@ -36,8 +55,11 @@ class TimerAViewModel  @Inject constructor(private val repository: WorkoutsRepos
 
     private val _pausedTime = MutableStateFlow<Long?>(null)
     private val pausedTime = _pausedTime.asStateFlow()
+//    private var _exerciseName =  MutableStateFlow  ("")
+//    val  exerciseName: StateFlow<String> =_exerciseName.asStateFlow()
 
-//  private val rang =     0 to  playingWorkout.value.workOutPrimaryDetail.size-1
+    private var soundPlayed = false
+
 
     private val tic = 20L
 
@@ -72,15 +94,25 @@ class TimerAViewModel  @Inject constructor(private val repository: WorkoutsRepos
     private var _showAlert=  MutableStateFlow  (false)
     val showAlert: StateFlow<Boolean> =_showAlert.asStateFlow()
 
+//    private var _isLoaded=  MutableStateFlow  (false)
+//    val  isLoaded: StateFlow<Boolean> =_isLoaded.asStateFlow()
+//
+//    fun isLoadedFalse()= viewModelScope.launch  (Dispatchers.IO) {
+//
+//        _isLoaded.value = true
+//
+//
+//        Log.d("T","isPause" )
+//    }
+
+
+
 
 
 
 
 
     private var startTime by   mutableLongStateOf(0L)
-
-
-
 
 
     private val _elapsedTime = MutableStateFlow(0L)
@@ -90,6 +122,14 @@ class TimerAViewModel  @Inject constructor(private val repository: WorkoutsRepos
 
 
     private var job: Job? = null
+
+//////////////////////////////////////////
+
+    /////////////////////////////////////////////
+
+
+
+
     fun startTimer()  = viewModelScope.launch  (Dispatchers.IO){
         if (job?.isActive == true) return@launch // Already running
 
@@ -117,16 +157,23 @@ class TimerAViewModel  @Inject constructor(private val repository: WorkoutsRepos
 
                      elapsedTime = System.currentTimeMillis() - startTime
                      currentTime.value = workout.workOutPrimaryDetail[i.value].intervalDuration - elapsedTime
-
-                     exercisesTotalTime= workout.workOutPrimaryDetail.subList(i.value,
-                         playingWorkout.value!!.workOutPrimaryDetail.size).sumOf { it.intervalDuration } - elapsedTime
+  exercisesTotalTime= workout.workOutPrimaryDetail.subList(i.value,playingWorkout.value!!.workOutPrimaryDetail.size).sumOf { it.intervalDuration } - elapsedTime
 
                      value.value = currentTime.value / workout.workOutPrimaryDetail[i.value].intervalDuration.toFloat()
                      value1.value = exercisesTotalTime / timeTotalList.toFloat()
 
 
+                     if (currentTime.value in 0..3000L && !soundPlayed  ) {
+                         playSound()
+                         soundPlayed = true // Set the flag to true after playing the sound
+                     }
+
+//                     _exerciseName.value= if(workout.workOutPrimaryDetail[i.value].intervalName!=""){workout.workOutPrimaryDetail[i.value].intervalName}
+//                     else{workout.workOutPrimaryDetail[i.value].intervalType}
+
 
                      if ( currentTime.value == 0L || currentTime.value < 0L ) {
+                         soundPlayed=false
                          i.value++
                          startTime = System.currentTimeMillis()
                          _elapsedTime.value = System.currentTimeMillis() - startTime
@@ -143,14 +190,28 @@ class TimerAViewModel  @Inject constructor(private val repository: WorkoutsRepos
 
              }
          }
-            // ... other operations ...
+
         }
 
 
 
 
     }
+//
 
+
+
+    /////
+    private fun playSound() =  viewModelScope.launch {
+
+        val soundId = soundPool.load (context, R.raw.treescondscountdown, 1)
+        soundPool.setOnLoadCompleteListener { _, _, _ ->
+            soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
+        }
+
+    }
+
+    ///
 
     fun pauseTimer()= viewModelScope.launch  (Dispatchers.IO) {
 
@@ -162,19 +223,19 @@ class TimerAViewModel  @Inject constructor(private val repository: WorkoutsRepos
         Log.d("T","isPause" )
     }
 
-//    fun resetTimer()= viewModelScope.launch  (Dispatchers.IO)  {
-//        job?.cancel()
-//        _playingWorkout.value =  null
-//        _isTimerRunning.value=false
-//        _showAlert.value=false
-//        _pausedTime.value =  null
-//        value.value=0f
-//        value1.value=0f
-//        i.value=0
-//
-//
-//
-//    }
+    fun resetTimer()= viewModelScope.launch  (Dispatchers.IO)  {
+        job?.cancel()
+        _playingWorkout.value =  null
+        _isTimerRunning.value=false
+        _showAlert.value=false
+        _pausedTime.value =  null
+        value.value=0f
+        value1.value=0f
+        i.value=0
+
+
+
+    }
     fun nextInterval()= viewModelScope.launch  (Dispatchers.IO)  {
         job?.cancel()
         i.value++
@@ -192,9 +253,9 @@ class TimerAViewModel  @Inject constructor(private val repository: WorkoutsRepos
     }
 
 
-    fun resumeTimer() = viewModelScope.launch  (Dispatchers.IO) {
-        _isTimerRunning.value = true
-    }
+//    fun resumeTimer() = viewModelScope.launch  (Dispatchers.IO) {
+//        _isTimerRunning.value = true
+//    }
 
 
 

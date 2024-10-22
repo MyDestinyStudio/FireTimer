@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">Firetimer</string>
+    <string name="intervals">" %1$s Intervals |"</string>
+    <string name="sets">" sets %1$s"</string>
+    <string name="warm_up">Warm Up</string>
+    <string name="work">Work</string>
+    <string name="rest">Rest</string>
+    <string name="work_rest_number">Work/Rest number</string>
+    <string name="rest_btw_sets">Rest Btw Sets</string>
+    <string name="sets_number"> Sets number </string>
+    <string name="cool_down">Cool Down</string>
+    <string name="create_workout">Create Workout</string>
+    <string name="update">Update</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="update_name">"Update Name "</string>
+    <string name="workouts">%1$s Workouts</string>
+    <string name="delete">"Delete "</string>
+    <string name="are_you_sure">" Are You Sure ? "</string>
+    <string name="ok">OK</string>
+    <string name="are_sure_you_want_to_exit">Are Sure you want to Exit ?</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
 </resources>

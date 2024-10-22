@@ -4,7 +4,7 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import my.destinyStudio.firetimer.data.IntervalsInfo
-import java.util.*
+import java.util.UUID
 
 class UUIDConverter {
     @TypeConverter
@@ -31,3 +31,4 @@ class ListConverter {
         return gson.toJson(list)
     }
 }
+

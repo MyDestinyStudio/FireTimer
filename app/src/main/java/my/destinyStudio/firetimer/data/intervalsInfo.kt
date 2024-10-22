@@ -1,23 +1,22 @@
 package my.destinyStudio.firetimer.data
 
-
-
-
-import androidx.compose.runtime.Immutable
 import java.util.UUID
 
 
-data class  IntervalsInfo(val intervalType:String ,
-                          val  intervalDuration:Long  ,
-                          val  intervalName:String
+data class  IntervalsInfo(
+            val intervalType:String ,
+            val  intervalDuration:Long  ,
+            val  intervalName:String,
+            val uri : String? = null
 )
 
 
 
-@Immutable
+
 data class IntervalsInfoIndexed(
+    val id: UUID = UUID.randomUUID(),
     val intervalType: String,
     val intervalDuration: Long,
     val intervalName: String,
-    val id: UUID = UUID.randomUUID()
+    var uri: String? =  null
 )

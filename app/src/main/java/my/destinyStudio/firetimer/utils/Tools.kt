@@ -1,57 +1,94 @@
 package my.destinyStudio.firetimer.utils
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import my.destinyStudio.firetimer.components.IntervalsType
-import my.destinyStudio.firetimer.data.ExpTA
 import my.destinyStudio.firetimer.data.IntervalsInfo
 import my.destinyStudio.firetimer.data.IntervalsInfoIndexed
 import my.destinyStudio.firetimer.data.WorkOutDetail
+import java.io.File
+import java.sql.Date
+import java.time.Instant
 
-fun   edToNormal(intervalsInfo: IntervalsInfo): IntervalsInfoIndexed {
-    return IntervalsInfoIndexed(
-        intervalType = intervalsInfo.intervalType,
-        intervalDuration = intervalsInfo.intervalDuration,
-        intervalName = intervalsInfo.intervalName
-    )
-}
-fun  indexedToNormal(intervalsInfoIndexed: IntervalsInfoIndexed): IntervalsInfo {
-    return IntervalsInfo(
-        intervalType = intervalsInfoIndexed.intervalType,
-        intervalDuration = intervalsInfoIndexed.intervalDuration,
-        intervalName = intervalsInfoIndexed.intervalName
-    )
-}
-fun  toIndexed(intervalsInfo: List<IntervalsInfo>  ): MutableList <IntervalsInfoIndexed>  {
+@RequiresApi(Build.VERSION_CODES.O)
+fun generateImageWorkoutA(uris: List<File>, sets:Int =1, wD:Long, rD:Long  ) : WorkOutDetail {
 
-    return intervalsInfo .map { info ->
-        IntervalsInfoIndexed(
-            intervalType = info.intervalType,
-            intervalDuration = info.intervalDuration,
-            intervalName = info.intervalName
+
+    val imagedPart = mutableListOf <IntervalsInfo>()
+
+    val imagedPart2 = mutableListOf <IntervalsInfo>()
+
+    uris.forEach { file ->
+        imagedPart.add(
+            IntervalsInfo(
+                intervalType = IntervalsType.WORK_OUT,
+                intervalName = "",
+                intervalDuration = wD,
+                uri = file.absolutePath
+            )
         )
-    }.toMutableList()
+        imagedPart.add(
+            IntervalsInfo(
+                intervalType = IntervalsType.REST,
+                intervalName = "",
+                intervalDuration = rD
+            )
+        )
+    }
+    imagedPart.removeLast()
+    imagedPart.add(  IntervalsInfo(intervalType = IntervalsType.REST_BTW_SETS, intervalName ="" , intervalDuration = 30000)  )
+
+
+
+
+    repeat( sets) {
+
+        imagedPart2.addAll(imagedPart)
+
+    }
+
+    imagedPart2. add(index = 0,
+        IntervalsInfo(intervalType = IntervalsType.WARM_UP, intervalName ="" , intervalDuration =30000)
+    )
+    imagedPart2.removeAt(index = imagedPart2.lastIndex)
+    imagedPart2.add(IntervalsInfo(intervalType = IntervalsType.COOL_DOWN, intervalName ="" , intervalDuration = 12000))
+    imagedPart2.forEach {
+        Log.d("A",it.toString())
+    }
+    return WorkOutDetail(workOutName = Date.from(Instant.now()).toString() , workOutPrimaryDetail = imagedPart2)
+
+
 }
-fun  toIndexedA( intervalsInfo: List<IntervalsInfo>     ): MutableList <IntervalsInfoIndexed>     {
+//}
+fun  toIndexed( intervalsInfo: List<IntervalsInfo?>   ): MutableList <IntervalsInfoIndexed>     {
 
     val list =  intervalsInfo .map { info ->
             IntervalsInfoIndexed(
-                intervalType = info.intervalType,
-                intervalDuration = info.intervalDuration,
-                intervalName = info.intervalName
+                intervalType = info?.intervalType ?: IntervalsType.OTHER,
+                intervalDuration = info?.intervalDuration ?: 0L,
+                intervalName = info?.intervalName ?: "",
+                uri = info?.uri
             )
         } .toMutableList()
 
+  //  Log.d("F","toIndexed")
     return list
 }
 
 fun  toNormal( intervalsInfoIndexed :List<IntervalsInfoIndexed> ): List<IntervalsInfo> {
-    return intervalsInfoIndexed .map { indexedInfo ->
-        IntervalsInfo(
-            intervalType = indexedInfo.intervalType,
-            intervalDuration = indexedInfo.intervalDuration,
-            intervalName = indexedInfo.intervalName
-        )
-    }
+
+   val list = intervalsInfoIndexed .map { indexedInfo ->
+       IntervalsInfo(
+           intervalType = indexedInfo.intervalType,
+           intervalDuration = indexedInfo.intervalDuration,
+           intervalName = indexedInfo.intervalName,
+           uri = indexedInfo.uri
+       )
+   }
+    Log.d("F","toNormal")
+    return list
+
 }
 fun formatToMMSSMillis(milliseconds: Long): String {
     val minutes = milliseconds / (1000 * 60)
@@ -65,10 +102,7 @@ fun formatToMMSS(milliseconds: Long): String {
     val seconds = (milliseconds % (1000 * 60)) / 1000
     return String.format("%02d:%02d", minutes, seconds)
 }
-fun workOutListBuilder(name:String="name",list : List<IntervalsInfo> = ExpTA):WorkOutDetail{
-    return WorkOutDetail(workOutName = name, workOutPrimaryDetail = list  )
 
-}
 fun  workOutListBuilder(  warmUpD:Long , workOutD:Long  , restD:Long , workRestC:Int ,
                     restBtSets:Long , setsC :Int , coolDownD:Long
                 ):MutableList<IntervalsInfo>{
@@ -81,26 +115,34 @@ fun  workOutListBuilder(  warmUpD:Long , workOutD:Long  , restD:Long , workRestC
       )
     repeat(workRestC) {
         result.addAll(wrIntervals)
-        Log.d("A",result.toString())
+
     }
 
-
+    result.removeLast()
   result.add(  IntervalsInfo(intervalType = IntervalsType.REST_BTW_SETS, intervalName ="" , intervalDuration = restBtSets)  )
 
     repeat(  setsC) {
         result2.addAll(result)
-        Log.d("A",result2.toString())
+
     }
 
     result2.add(index = 0,IntervalsInfo(intervalType = IntervalsType.WARM_UP, intervalName ="" , intervalDuration = warmUpD))
     result2.removeAt(index = result2.lastIndex)
     result2.add(IntervalsInfo(intervalType = IntervalsType.COOL_DOWN, intervalName ="" , intervalDuration = coolDownD))
 
+   // Log.d("wListBuilder",result2.toString())
     return result2
+
 
 }
 
-fun workoutGenerator(name:String ,list: MutableList <IntervalsInfo>):WorkOutDetail{
+
+fun workoutGenerator(list: MutableList <IntervalsInfo>):WorkOutDetail{
+    val name= if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        Date.from(Instant.now()).toString()
+    } else {
+        "ff"
+    }
 
 
     return WorkOutDetail(workOutName = name, workOutPrimaryDetail = list)

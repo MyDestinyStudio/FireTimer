@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -71,15 +72,15 @@ fun NameChangeAlertDialog(initialName: String?="", onDismiss: () -> Unit={}, onC
 
 @Composable
 @Preview
-fun TopAppBarEditWorkOuts(nameW: String?="name", duration: Int=8000, intervalsNumber: Int=4,
+fun TopAppBarEditWorkOuts( topAppEditBarHeight: Dp =80.dp, nameW: String?="name", duration: Int=8000, intervalsNumber: Int=4,
                           setsNumber:Int =4, onReviewClick: () -> Unit={},
                           textClicked: () -> Unit={}, onBackClick: () -> Unit={},
 
-            onReset : () -> Unit={}) {
+                          onReset : () -> Unit={}) {
 
     Surface (modifier = Modifier
         .fillMaxWidth()
-        .height(80.dp),
+        .height(topAppEditBarHeight ),
         color = AppColors.mBlueL){
 
         Column {

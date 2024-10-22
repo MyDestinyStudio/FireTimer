@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,6 +16,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -29,11 +31,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import my.destinyStudio.firetimer.ui.theme.dimens
 
 
-@Preview(showBackground = true)
+@Preview(backgroundColor = 0xFFCCC2DC, showBackground = true )
 @Composable
-fun TimePickerCard(secondsInPut :Int =10,
+fun TimePickerCard(modifier : Modifier = Modifier,
+                   secondsInPut :Int =10,
                    minutesInPut: Int=0,
                    color: Color= Color.Black,
                    minusColor :Color= Color.White,
@@ -50,15 +54,16 @@ fun TimePickerCard(secondsInPut :Int =10,
     var intervalDuration =seconds.intValue + minutes.intValue*60
     val duration = intervalDuration*1000L
 
+
     durationValue(duration)
-    Card(modifier = Modifier.padding(0.dp) ,
+    Card(modifier = Modifier,
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
 
         ),
-        border = BorderStroke(1.dp, borderColor)
+        border = BorderStroke(MaterialTheme.dimens.pickerCardBorderTickness, borderColor)
     ) {
-        Row(modifier =Modifier.padding(vertical = 1.dp) ,verticalAlignment = Alignment.CenterVertically,
+        Row(  modifier = Modifier.padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center) {
 
             IconButton(onClick = {
@@ -73,11 +78,11 @@ fun TimePickerCard(secondsInPut :Int =10,
             }
 
 
-
-
-            Row(Modifier.padding(2.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-
-                OutlinedTextField(  modifier = Modifier.width(64.dp)  ,
+                OutlinedTextField(
+                     modifier = Modifier.padding(horizontal = 2.dp)
+                         .height(MaterialTheme.dimens.pickerCardSize)
+                         .  width(MaterialTheme.dimens.pickerCardSize)
+                          ,
                     value = minutes.intValue.toString(),
                     onValueChange = { value ->
                         minutes.intValue = value.toIntOrNull() ?: 0
@@ -85,8 +90,18 @@ fun TimePickerCard(secondsInPut :Int =10,
                         if (minutes.intValue >minutesRange.last)minutes.intValue=180
                         if (minutes.intValue < minutesRange.first)minutes.intValue=0
                         if(minutes.intValue<10) minutes.intValue= minutes.intValue.toString().format("%002d", minutes.intValue).toInt()
-                    },textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center, fontSize = 20.sp, color = color),
+                    },textStyle =
+                    LocalTextStyle.current.copy(
+                        textAlign = TextAlign.Center,
+                        fontSize = MaterialTheme.dimens.pickerCardSFontSize .sp,
+                        color = color,
+                         ),
+                    singleLine = true,
+
+                    maxLines = 1,
+
                     label={ Text(text = "Min", color = color) },
+
                     colors = OutlinedTextFieldDefaults.
                     colors(
                         focusedTextColor = color,
@@ -109,7 +124,12 @@ fun TimePickerCard(secondsInPut :Int =10,
                 Spacer(modifier = Modifier.width(2.dp))
 
 
-                OutlinedTextField( modifier = Modifier.width(64.dp)    ,
+                OutlinedTextField(
+                    modifier = Modifier.padding(horizontal = 2.dp)
+                         .height(MaterialTheme.dimens.pickerCardSize)
+                        .  width(MaterialTheme.dimens.pickerCardSize)
+
+                              ,
                     value = seconds.intValue.toString(),
                     onValueChange = { value ->
                         seconds.intValue = value.toIntOrNull() ?: 0
@@ -118,6 +138,8 @@ fun TimePickerCard(secondsInPut :Int =10,
                         if(seconds.intValue<10) seconds.intValue= seconds.intValue.toString().format("%002d", seconds.intValue).toInt()
 
                     },
+                    singleLine = true,
+                    maxLines = 1,
                     label={ Text(text = "Sec" , color = color) },
                     colors = OutlinedTextFieldDefaults.
                     colors(
@@ -131,13 +153,16 @@ fun TimePickerCard(secondsInPut :Int =10,
 
 
                         ),
-                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center, fontSize = 20.sp,  color = color),
+                    textStyle = LocalTextStyle.current.copy(
+                        textAlign = TextAlign.Center,
+                        fontSize = MaterialTheme.dimens.pickerCardSFontSize.sp ,
+                        color = color),
 
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
 
-            }
+
             IconButton(onClick = {
                 intervalDuration += 5
                 seconds.intValue=intervalDuration%60
@@ -154,7 +179,8 @@ fun TimePickerCard(secondsInPut :Int =10,
 
         }
     }
-
 }
+
+
 
 

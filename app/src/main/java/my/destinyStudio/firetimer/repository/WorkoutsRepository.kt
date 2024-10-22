@@ -8,10 +8,12 @@ import my.destinyStudio.firetimer.data.WorkOutDetail
 
 import javax.inject.Inject
 
+
+
 class WorkoutsRepository @Inject constructor(
     private val workOutDetailDao: WorkOutDetailDao
 ) {
-suspend    fun addW(workOutDetail: WorkOutDetail)= workOutDetailDao.insert(workOutDetail)
+     fun addW(workOutDetail: WorkOutDetail)= workOutDetailDao.insert(workOutDetail)
 
      fun updateW(workOutDetail: WorkOutDetail)=workOutDetailDao.update(workOutDetail)
 

@@ -49,7 +49,7 @@ fun Arcs(sizeArc: Dp =200.dp, strokeWidth:Int=10,
         val outerRadius =
             (sizeArc.toPx() / 2) - (strokeWidth.toFloat() * 1f)
         val innerRadius =
-            (sizeArc.toPx()  / 2) - (strokeWidth.toFloat() * 2f + 7f)
+            (sizeArc.toPx()  / 2) - (strokeWidth.toFloat() * 2f + 4f)
         // Draw outer arc
         drawArc(
             color = PurpleGrey40,
@@ -100,29 +100,23 @@ fun Arcs(sizeArc: Dp =200.dp, strokeWidth:Int=10,
 
 fun Lines (
  strokeWidth:Dp=20 .dp,
-    canvasWidth :Int  =210 ,
+    canvasWidth :Dp  =210.dp ,
          valueUpper:Float=0.5f,
-           valueDown :Float=0.7f
+           valueDown :Float=0.7f,
+    cap: StrokeCap = StrokeCap.Round
 
 ){
-
-
-
 
 
     val heightA =   strokeWidth*2+10.dp
 
     Canvas(
-            modifier = Modifier .width(canvasWidth.dp).height( heightA )
-
-
-        ) {
-
-
-            drawLine(
+            modifier = Modifier .width(canvasWidth ).height( heightA )
+   ) {
+   drawLine(
                 color = AppColors.mLightGray,
                 start = Offset(x = 0f, y = (heightA. toPx() / 4)),
-                end = Offset(x = canvasWidth.dp.toPx(), y = (heightA.toPx() / 4)),
+                end = Offset(x = canvasWidth .toPx(), y = (heightA.toPx() / 4)),
                 strokeWidth = strokeWidth.toPx(),
                 cap = StrokeCap.Square,
 
@@ -131,9 +125,9 @@ fun Lines (
             drawLine(
                 color = Color.Blue,
                 start = Offset(x = 0f, y = (heightA.toPx() / 4)),
-                end = Offset(x = canvasWidth.dp.toPx() * valueDown, y = (heightA.toPx() / 4)),
+                end = Offset(x = canvasWidth .toPx() * valueDown, y = (heightA.toPx() / 4)),
                 strokeWidth = strokeWidth.toPx(),
-                cap = StrokeCap.Round
+                cap = cap
 
 
             )
@@ -141,7 +135,7 @@ fun Lines (
             drawLine(
                 color = AppColors.mGray,
                 start = Offset(x = 0f, y = (heightA.toPx() * 0.75).toFloat()),
-                end = Offset(x = canvasWidth.dp.toPx(), y = (heightA.toPx() * 0.75).toFloat()),
+                end = Offset(x = canvasWidth .toPx(), y = (heightA.toPx() * 0.75).toFloat()),
                 strokeWidth = strokeWidth.toPx(),
                 cap = StrokeCap.Square
 
@@ -150,9 +144,9 @@ fun Lines (
             drawLine(
                 color = Color.Red,
                 start = Offset(x = 0f, y = (heightA.toPx() * 0.75).toFloat()),
-                end = Offset(x = canvasWidth.dp.toPx() * valueUpper, y = (heightA.toPx() * 0.75).toFloat()),
+                end = Offset(x = canvasWidth .toPx() * valueUpper, y = (heightA.toPx() * 0.75).toFloat()),
                 strokeWidth = strokeWidth.toPx(),
-                cap = StrokeCap.Round
+                cap = cap
 
             )
 
@@ -164,9 +158,11 @@ fun Lines (
 
 @Composable
  //@Preview(showBackground = true)
-fun ExercisesIndicator (   index: Int=0,listOfExercise:  List  <IntervalsInfo> = ExpTA,
+fun ExercisesIndicator (
+    modifier: Modifier=Modifier
+    ,index: Int=0,listOfExercise:  List  <IntervalsInfo> = ExpTA,
                         isPlus:Boolean= true,
-                           cardHeight:Int=30
+
                         ){
     val customList = listOfExercise.toMutableList()
     customList.add( 0,IntervalsInfo(intervalType = "", intervalDuration = 0, intervalName = "START !!" ))
@@ -174,11 +170,11 @@ fun ExercisesIndicator (   index: Int=0,listOfExercise:  List  <IntervalsInfo> =
     customList.add(customList.lastIndex+1,IntervalsInfo(intervalType = "", intervalDuration = 0, intervalName = "" ))
 
 
-    Card(modifier = Modifier  ,
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-
-    ) {
-        Row (modifier = Modifier , verticalAlignment = Alignment.CenterVertically
+//    Card(modifier = modifier  ,
+//        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+//
+//    ) {
+        Row (modifier = modifier , verticalAlignment = Alignment.CenterVertically
              ){
             TriangleL(sizeC = 20.dp)
 
@@ -187,11 +183,12 @@ fun ExercisesIndicator (   index: Int=0,listOfExercise:  List  <IntervalsInfo> =
                 .weight(1f)
                 .padding(horizontal = 2.dp)) {
 
-        AnimatedContent( targetState = customList[index ],
+        AnimatedContent( modifier =Modifier .weight(1f)
+            .fillMaxWidth(),targetState = customList[index ],
            transitionSpec = {  slideInVertically { if (isPlus) it else if(!isPlus) -it else it } togetherWith slideOutVertically { if (isPlus) -it else if(!isPlus) it else -it  } }
 
                         , label = "") {
-                            interval  -> IntervalIndicator(index, interval, height = cardHeight)
+                            interval  -> IntervalIndicator(index, interval )
                     }
 
                 Card(modifier = Modifier
@@ -200,12 +197,13 @@ fun ExercisesIndicator (   index: Int=0,listOfExercise:  List  <IntervalsInfo> =
                     colors = CardDefaults.cardColors(containerColor = Color.Green)
                 ){}
 
-                    AnimatedContent( targetState = customList[ index+1 ],
+                    AnimatedContent(modifier =Modifier .weight(1f)
+                        .fillMaxWidth(), targetState = customList[ index+1 ],
                         transitionSpec = {
                             slideInVertically { if (isPlus) it else if(!isPlus) -it else it } togetherWith slideOutVertically { if (isPlus) -it else if(!isPlus) it else -it  }
 
                         }, label = "") {
-                            interval  -> IntervalIndicator( index+1 ,interval , height = cardHeight )
+                            interval  -> IntervalIndicator( index+1 ,interval   )
                     }
 
                    Card(modifier = Modifier
@@ -213,12 +211,12 @@ fun ExercisesIndicator (   index: Int=0,listOfExercise:  List  <IntervalsInfo> =
                        .fillMaxWidth(),
                        colors = CardDefaults.cardColors(containerColor = Color.Green)
                         ){}
-                    AnimatedContent( targetState = customList[index+2],
+                    AnimatedContent(modifier =Modifier .weight(1f)
+                        .fillMaxWidth(), targetState = customList[index+2],
                         transitionSpec = { slideInVertically { if (isPlus) it else if(!isPlus) -it else it } togetherWith slideOutVertically { if (isPlus) -it else if(!isPlus) it else -it  }
-                        //    slideInVertically { it } togetherWith slideOutVertically { -it }
-                            //  slideInVertically { -it } togetherWith slideOutVertically {  it }
+
                         }, label = "") {
-                            interval  -> IntervalIndicator( index+2 ,interval , height = cardHeight )
+                            interval  -> IntervalIndicator( index+2 ,interval  )
                     }
 
             }
@@ -228,20 +226,20 @@ fun ExercisesIndicator (   index: Int=0,listOfExercise:  List  <IntervalsInfo> =
         }
 
 
-    }
+   // }
 }
 @Composable
  //@Preview
 fun IntervalIndicator(
     index : Int = 0 ,
      interval : IntervalsInfo ,
-   height:Int =30
+    intervalIndicatorHeight:Dp =30.dp
 
 ){
     Card(modifier = Modifier
-        .fillMaxWidth()
+        .fillMaxSize()
         .padding(vertical = 2.dp)
-        .height(height.dp)
+         .height(intervalIndicatorHeight)
 
     ) {
 
@@ -328,7 +326,7 @@ fun TriangleR(
 //@Preview
 @Composable
 
-fun TimeText(
+fun TimeText(modifier: Modifier=Modifier,
 
     timeLeft :Long = 20000L,
     textSize :Int=   35 ,
@@ -336,7 +334,7 @@ fun TimeText(
 
 ){
 
-        Text(text = formatToMMSSMillis(timeLeft), color = color, fontSize = textSize.sp)
+        Text(modifier=modifier,text = formatToMMSSMillis(timeLeft), color = color, fontSize = textSize.sp)
 
 
 

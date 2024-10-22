@@ -14,23 +14,22 @@ import my.destinyStudio.firetimer.data.WorkOutDetail
     interface WorkOutDetailDao {
 
         @Query("SELECT * from workouts_table ")
-        fun getWorkouts() : Flow<MutableList <WorkOutDetail>>
+         fun getWorkouts() : Flow<MutableList <WorkOutDetail>>
 
         @Query("SELECT * from workouts_table where id =:id")
          fun getWorkoutById(id: String): Flow<WorkOutDetail>
 
         @Insert(onConflict = OnConflictStrategy.REPLACE)
-       fun insert(note: WorkOutDetail)
+         fun insert(note: WorkOutDetail)
 
         @Update(onConflict = OnConflictStrategy.REPLACE)
          fun update(note: WorkOutDetail)
 
         @Query("DELETE from workouts_table")
-
          fun deleteAll()
 
          @Query(" Delete   from workouts_table where id =:id")
-        fun deleteId(id: String)
+          fun deleteId(id: String)
 
         @Delete
          fun deleteWorkout(note: WorkOutDetail)

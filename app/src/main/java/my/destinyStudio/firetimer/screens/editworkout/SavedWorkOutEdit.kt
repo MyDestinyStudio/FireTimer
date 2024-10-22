@@ -1,138 +1,135 @@
 package my.destinyStudio.firetimer.screens.editworkout
 
  
-import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import kotlinx.coroutines.launch
 import my.destinyStudio.firetimer.components.IntervalsType
 import my.destinyStudio.firetimer.data.IntervalsInfoIndexed
 import my.destinyStudio.firetimer.navigation.Screens
+import my.destinyStudio.firetimer.screens.imagesScreen.ImageDataViewmodel
 import my.destinyStudio.firetimer.ui.theme.AppColors
+import kotlin.math.roundToInt
 
 
-@SuppressLint("StateFlowValueCalledInComposition", "UnrememberedMutableState")
 @Composable
 
 fun SavedWorkOutEditScreen(
     navController: NavController=NavController(context = LocalContext.current),
-   identifier:String,
-    editWorkoutViewModel: EditWorkoutViewModel= viewModel( key = "workout_edit_$identifier" ),
+    identifier:String,
+    editWorkoutViewModel: EditWorkoutViewModel= hiltViewModel(),
+    imageDataViewmodel: ImageDataViewmodel= hiltViewModel()
 ){
 
 
-    val workoutState by editWorkoutViewModel.workoutUi.collectAsState()
-
-
-    val totalDuration by editWorkoutViewModel.totalDuration.collectAsState()
-
-    val intervalsNumber by  editWorkoutViewModel.intervalsNumber.collectAsState()
-
-    val setsNumber  by  editWorkoutViewModel.setsNumber.collectAsState()
-
-    var showReview by remember { mutableStateOf(false) }
-
-    var showNameDialog by remember { mutableStateOf(false) }
+    val internalStorageImageFilesUris by imageDataViewmodel.internalStorageImageFilesUris.collectAsState()
+    val workoutState              by editWorkoutViewModel.workoutUi.collectAsState()
+    val totalDuration             by editWorkoutViewModel.totalDuration.collectAsState()
+    val intervalsNumber           by  editWorkoutViewModel.intervalsNumber.collectAsState()
+    val setsNumber                by  editWorkoutViewModel.setsNumber.collectAsState()
+  //  val wName                     by editWorkoutViewModel. workoutUiName.collectAsState()
 
     val listState = rememberLazyListState()
+    val context = LocalContext.current
 
+    var showReview             by rememberSaveable { mutableStateOf(false) }
+    var showNameDialog         by rememberSaveable { mutableStateOf(false) }
+    var isLoaded               by rememberSaveable { mutableStateOf(true) }
+    var offsetX                by rememberSaveable {  mutableFloatStateOf(0f) }
+    var offsetY                by rememberSaveable { mutableFloatStateOf(0f) }
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    DisposableEffect(lifecycleOwner) {
-        onDispose {
-            editWorkoutViewModel.onCleared()
-            Log.d("T","Edit Dipose " )
-        }
+    var scrollTo by remember {
+        mutableIntStateOf(0)
     }
+
 
     BackHandler {
         navController.popBackStack(route = Screens.SavedWorkOutScreen.route ,inclusive = false)
+                 }
 
+  LaunchedEffect( key1 = identifier, key2 = isLoaded) {
+if(isLoaded) {
+    editWorkoutViewModel.getWByIdd(identifier)
 
+    imageDataViewmodel.loadImages(context)
+    isLoaded = false
+    Log.d("F", "Re W")
+
+}
     }
 
 
+  LaunchedEffect(key1 = scrollTo){
 
-    LaunchedEffect(key1 = identifier) {
-        lifecycleOwner.lifecycleScope.launch {
-            if (identifier!=editWorkoutViewModel.workout.value?.id.toString()) {
-                editWorkoutViewModel.getWByIdd(identifier)
-            }
-
-
-            Log.d("A", "Launched Effect,$identifier")
-        }
+        listState.animateScrollToItem(scrollTo)
+      Log.d("F", "Scroll")
     }
 
 
-//    var scrollTo by remember {
-//    mutableIntStateOf(0)
-//}
-//    LaunchedEffect(key1 = scrollTo){
-//        listState.animateScrollToItem(scrollTo)
-//    }
 
 
     if (showNameDialog) {
-        NameChangeAlertDialog(   initialName = workoutState.nameW,  onDismiss = { showNameDialog = false },
+        NameChangeAlertDialog(
+            initialName = workoutState.nameW,
+            onDismiss={showNameDialog=false},
             onConfirm = {
                editWorkoutViewModel.changeName(it.toString())
-                showNameDialog = false   }
+                showNameDialog = false}
                       )
-                          }
+                       }
 
-
-    if(showReview)  {
-        ExercisesReview (listOfIndexedInterval = workoutState.intervalList   , onDismiss ={  showReview= false   } ,
+   if(showReview)  {
+        ExercisesReview (
+            listOfIndexedInterval = workoutState.intervalList  ,
+            onDismiss ={ showReview= false} ,
             cardClicked = {
-          //  scrollTo = it
+           scrollTo = it
             showReview= false
             }
         )
 
-                     }
+                }
 
  Scaffold(modifier = Modifier.fillMaxSize() ,
            topBar ={
-               TopAppBarEditWorkOuts(   nameW = workoutState.nameW ,
+               TopAppBarEditWorkOuts(   nameW = workoutState.nameW,
                    duration = totalDuration ,
                    intervalsNumber =  intervalsNumber  ,
                    setsNumber=  setsNumber ,
@@ -140,8 +137,7 @@ fun SavedWorkOutEditScreen(
                    textClicked = {  showNameDialog = true  },
                    onReset ={
                        editWorkoutViewModel.undoChange()
-
-                   } ,
+                              } ,
                    onBackClick = {
       navController.popBackStack(route = Screens.SavedWorkOutScreen.route ,inclusive = false)
                    },
@@ -149,19 +145,38 @@ fun SavedWorkOutEditScreen(
                )
 
 
-                   }    ) {
-           paddingValues  ->
-           Box( modifier = Modifier
-               .padding(paddingValues)
-               .fillMaxSize()){
+                   } , floatingActionButton =  {
+         FloatingActionButton(
+             modifier = Modifier
+                 .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+                 .pointerInput(Unit) {
+                     detectDragGestures { change, dragAmount ->
+                         change.consume()
+                         offsetX += dragAmount.x
+                         offsetY += dragAmount.y
+                     }
+                 }
+                 .size(70.dp)
+                ,
+             onClick = {
+                 editWorkoutViewModel.updateWorkOut()
+                 workoutState.intervalList.forEach { ii ->  Log.d("Edit", "Fab $ii") }
+                       },
+             shape = CircleShape,
+             containerColor = AppColors.mOrange ,
+             elevation = FloatingActionButtonDefaults.elevation(defaultElevation=3.dp,pressedElevation=25.dp)
 
-               Column(modifier = Modifier.fillMaxSize()) {
- 
-                   LazyColumn(
-                       modifier = Modifier
-                           .weight(1f),
+         ) {
+             Icon(  imageVector = Icons.Rounded.Download , contentDescription = "Add Interval", tint = Color.White   )    }
+
+     }  ) {
+           paddingValues  ->
+
+             LazyColumn( modifier = Modifier
+                 .fillMaxSize()
+                 .padding(paddingValues),
                       verticalArrangement = Arrangement.spacedBy(3.dp),
-                        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 7.dp),
+                        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 5.dp),
                        state = listState
                    ) {
 
@@ -172,8 +187,12 @@ fun SavedWorkOutEditScreen(
 
        index, interval ->  key ( interval.id  ) {
 
-                               IntervalModifier(
+                               IntervalModifier(modifier =   Modifier
+                                   .fillMaxWidth()
+                                   .height(150.dp),
                                    intervalToModify = interval,
+                                   context=context,
+                                   list =internalStorageImageFilesUris ,
 
                                    moveUp = {
                                        editWorkoutViewModel.swapIntervalUp(index)
@@ -185,26 +204,26 @@ fun SavedWorkOutEditScreen(
                                        editWorkoutViewModel. removeInterval( index)
                                                     },
                                    addInterval = {
-          val defaultIntervalIndexed=IntervalsInfoIndexed(intervalType=IntervalsType.WORK_OUT,intervalDuration=10000,intervalName ="")
+          val defaultIntervalIndexed=IntervalsInfoIndexed(
+              intervalType =IntervalsType.WORK_OUT,
+              intervalDuration =10000,
+              intervalName ="")
 
                     editWorkoutViewModel.addInterval(index=index+1,intervalsInfoI=defaultIntervalIndexed)
 
                                                  },
                                    newInterval = {
                                        mInterval ->
-                                   editWorkoutViewModel.updateInterval(index=index, intervalsInfoI = mInterval)
-                                   }
+
+                                       editWorkoutViewModel.updateInterval(index=index,intervalsInfoI = mInterval)
+                                   },
+
                                )
                            }
 
 
                        }
-   item {
-       Row(modifier = Modifier
-           .fillMaxWidth()
-           .align(Alignment.End), horizontalArrangement = Arrangement.Center) {
-                           Text(text = "Ends Here ", fontSize = 35.sp)
-                       } }
+
 
 
 
@@ -214,30 +233,6 @@ fun SavedWorkOutEditScreen(
 
 
 
-  FloatingActionButton(
-  modifier = Modifier
-      .align(Alignment.BottomEnd)
-      .size(80.dp)
-      .padding(5.dp),
-      onClick = { editWorkoutViewModel.updateWorkOut( )   },
-        containerColor = AppColors.mBlueL,
-         elevation =FloatingActionButtonDefaults.elevation(defaultElevation=3.dp,pressedElevation=25.dp)
-
-                       ) {
-                         Icon(   imageVector = Icons.Filled.Save, contentDescription = "Add Interval"   )    }
 
 
-                   }
-
-
-
-
-       }
-
-   }
-
-
-
-
-
-
+            }

@@ -67,6 +67,12 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.core.ktx)
+    implementation(libs.androidx.adaptive.android)
+    implementation(libs.androidx.datastore.core.android)
+    implementation(libs.rendering)
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -87,54 +93,49 @@ dependencies {
 
     // Dagger+Hilt
 
-    implementation("com.google.dagger:hilt-android:2.48")
-    ksp("com.google.dagger:hilt-android-compiler:2.48")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
 
-    ksp ("androidx.hilt:hilt-compiler:1.0.0")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0-rc01")
+    ksp (libs.androidx.hilt.compiler)
+    implementation (libs.hilt.navigation.compose)
 
-    implementation("com.google.dagger:hilt-android-gradle-plugin:2.40")
+    implementation(libs.hilt.android.gradle.plugin)
+
     //ksp("")\
-    //implementation( "org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.0-RC1 ")
+       implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
 
+    //implementation( "io.coil-kt:coil-compose:2.2.2")
+
+//coil
+    implementation( libs.coil.compose)
 
     //Room
-    implementation ("androidx.room:room-runtime:2.6.0")
-    implementation ("androidx.room:room-ktx:2.6.0")
-    ksp  ("androidx.room:room-compiler:2.6.0")
+    implementation (libs.androidx.room.runtime)
+    implementation (libs.androidx.room.ktx)
+    ksp  (libs.androidx.room.compiler)
 
 
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.symbol.processing.api)
 
 
     // Coroutines
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+    implementation (libs.kotlinx.coroutines.core)
+    implementation (libs.kotlinx.coroutines.android)
+    implementation (libs.kotlinx.coroutines.play.services)
 
     //noinspection GradleDependenc
-    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation (libs.androidx.lifecycle.runtime.ktx.v262)
+    implementation (libs.androidx.lifecycle.viewmodel.compose.v262)
     //LiveData
-    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
-    // implementation ("androidx.lifecycle.lifecycle-viewmodel-ktx:2.6.2")
+    implementation (libs.androidx.lifecycle.livedata.ktx)
 
-
-    //Navigation
-    implementation ("androidx.navigation:navigation-compose:2.7.5")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
-
-
+    implementation(libs.androidx.datastore.preferences)
 
     //Navigation
-    implementation ("androidx.navigation:navigation-compose:2.7.5")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation (libs.androidx.navigation.compose.v275)
+    implementation (libs.hilt.navigation.compose)
 
-///
-    implementation("androidx.room:room-runtime:2.6.1")
-    annotationProcessor("androidx.room:room-compiler:2.6.1")
-    implementation("com.google.devtools.ksp:symbol-processing-api:1.9.21-1.0.15")
-
-   ksp("androidx.room:room-compiler:2.6.1")
 
 
 }

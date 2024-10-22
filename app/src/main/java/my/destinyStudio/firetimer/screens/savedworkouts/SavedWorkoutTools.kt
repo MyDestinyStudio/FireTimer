@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,31 +17,28 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.filled.RemoveRedEye
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -48,16 +46,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import my.destinyStudio.firetimer.R
 import my.destinyStudio.firetimer.components.IntervalsType
 import my.destinyStudio.firetimer.data.IntervalsInfo
 import my.destinyStudio.firetimer.data.WorkOutDetail
 import my.destinyStudio.firetimer.data.wdTest
-import my.destinyStudio.firetimer.ui.theme.AppColors
 import my.destinyStudio.firetimer.ui.theme.IntervalTypeColors
+import my.destinyStudio.firetimer.ui.theme.dimens
 import my.destinyStudio.firetimer.utils.formatToMMSS
 
 @Composable
-//@Preview
+ //@Preview
 fun ExercisesReviewS(workoutToReview: WorkOutDetail = wdTest, onDismiss: () -> Unit={}  ) {
 
     val duration = formatToMMSS(workoutToReview.workOutPrimaryDetail.sumOf {it.intervalDuration.toInt()}.toLong())
@@ -65,7 +64,7 @@ fun ExercisesReviewS(workoutToReview: WorkOutDetail = wdTest, onDismiss: () -> U
     val size = workoutToReview.workOutPrimaryDetail.size
 
     Dialog(onDismissRequest = { onDismiss() }) {
-        Card(Modifier.padding(vertical = 60.dp, horizontal =30.dp),
+        Card(Modifier.padding(vertical = 20.dp, horizontal =30.dp),
            ) {
             Column {
                 Column(modifier = Modifier.fillMaxWidth() , horizontalAlignment = Alignment.CenterHorizontally) {
@@ -125,80 +124,68 @@ fun ExercisesReviewS(workoutToReview: WorkOutDetail = wdTest, onDismiss: () -> U
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-//@Preview
-fun  TopAppBarA (title: String="BamBamBamBamBamBamBamBamBamBamBamBam",
-                 navigationIcon: () -> Unit ={},
-                 infoIcon: () -> Unit={},
-                 settingIcon: () -> Unit={},
-                 //height:Int =70
+@Preview
+fun  TopAppBarA (title: String="",
+  actionButtons:List<Pair<ImageVector,String>> =
+                     listOf(
+                         Pair(Icons.Rounded.Add,"onAdd"),
+                        Pair(Icons.Rounded.Remove,"onRemove")
 
+                        )
+ ) {
 
-) {
-
-        CenterAlignedTopAppBar(
-
-
-            navigationIcon = {
-                IconButton(modifier = Modifier, onClick = { navigationIcon() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = " ",
-                        tint = Color.White
-                    )
-                }
-            },
-            title = {
+    TopAppBar(modifier = Modifier.height(MaterialTheme.dimens.appTopBar),
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor =  Color.Blue ,
+            titleContentColor = MaterialTheme.colorScheme.primary,
+        ),
+        title = {
+            Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = title,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
+                    text = stringResource(  R.string.app_name  ) + if (title != "") {
+                        " : "
+                    } else {
+                        ""
+                    },
+                    fontSize = MaterialTheme.dimens.appTitle.sp,
+                  fontWeight = FontWeight.ExtraBold,
                     color = Color.White
                 )
-            },
-            actions = {
-                IconButton(modifier = Modifier, onClick = { infoIcon() }) {
-                    Icon(
-                        imageVector = Icons.Filled.Info,
-                        contentDescription = " ",
-                        tint = Color.White
+                if (title != ""){
+                    Text(
+                        text = title,
+                        fontSize = MaterialTheme.dimens.appTitleSuffix.sp,
+                        color = Color.White
                     )
-
-
                 }
-                IconButton(modifier = Modifier, onClick = { settingIcon() }) {
-                    Icon(
-                        imageVector = Icons.Filled.Settings,
-                        contentDescription = " ",
-                        tint = Color.White
-                    )
+            }
 
-                }
+        },
+        actions = {
+            actionButtons.forEach {IconButton(modifier = Modifier.fillMaxHeight(),onClick = {it.second}) {
+                Icon( imageVector = it.first, contentDescription = "", tint = Color.White)
+
+            }  }
+
+        }
+    )
 
 
-            },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = AppColors.mBlueL),
-           // scrollBehavior =TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-            //TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-            //TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-        // TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-        )
     }
 
 
 @Composable
 //@Preview
-fun CardInfo(
+fun CardInfo( modifier :Modifier = Modifier,
     title : String="BolBol",
     subString : String="12:14"
 
 ){
     Card(
-        modifier = Modifier
-//            .height(50.dp)
-//            .width(70.dp)
+        modifier = modifier
+
         , colors = CardDefaults.cardColors(containerColor = Color.Red),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
     ) {
         Column(modifier = Modifier
             .fillMaxSize()
@@ -235,10 +222,10 @@ fun  IntervalDots(index:Int =1, interval: IntervalsInfo
     Column {
         Text(text = "${index+1 }. ${interval.intervalType} : ${interval.intervalName} ",
             overflow = TextOverflow.Ellipsis, color = Color.White   )
-        Divider(
-            color = Color.White,
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth(),
             thickness = 1.5.dp,
-            modifier = Modifier.fillMaxWidth()
+            color = Color.White
         )
 
     }
@@ -246,56 +233,24 @@ fun  IntervalDots(index:Int =1, interval: IntervalsInfo
 
 }
 
-@Composable
- @Preview
-fun InstructionsCard() {
-    Surface(
-        Modifier
-            .fillMaxWidth()
-            .height(70.dp),
-        color = AppColors.mBlueL
-    ){
-        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Row {
-                Text(text = "Tap", color = Color.White)
-                Icon(imageVector = Icons.Filled.Edit, contentDescription ="", tint = Color.White )
-                Text(text = "To Modify", color = Color.White)
-            }
-            Row {
-                Text(text = "Tap ", color = Color.White)
-                Icon(imageVector = Icons.Filled.Delete, contentDescription ="" , tint = Color.White)
-                Text(text = "To Delete ", color = Color.White)
-            }
-            Row {
-                Text(text = "Tap ", color = Color.White)
-                Icon(imageVector = Icons.Filled.RemoveRedEye, contentDescription ="" , tint = Color.White)
-                Text(text = "To Review ", color = Color.White)
-            }
-
-
-        }
-    }
-}
 
 @Composable
 //@Preview
 fun DeleteWorkoutAlertDialog(onDismiss: () -> Unit={}, onConfirm: () -> Unit={}) {
 
-    AlertDialog(text = { Text(text = "Delete ")}, title = { Text(text = " Are You Sure ? ")},
-        onDismissRequest = { onDismiss() }, confirmButton = {
-            IconButton(onClick = { onConfirm() }, content = { Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = "", tint = Color.Green
-            )})
+    AlertDialog(text = { Text(text = stringResource(R.string.delete))}, title = { Text(text = stringResource( R.string.are_you_sure
+    )
+    )},
+        onDismissRequest = { onDismiss() },
+        confirmButton = {
+            IconButton(onClick = { onConfirm() }, content = {
+                Icon(  imageVector = Icons.Filled.Check, contentDescription = "", tint = Color.Green )  })
 
         },
         dismissButton = {
-            IconButton(onClick = { onDismiss() }, content = { Icon(
-                imageVector = Icons.Filled.RadioButtonUnchecked,
-                contentDescription = "", tint = Color.Red
-            )})
+            IconButton(onClick = { onDismiss() }, content = { Icon(imageVector = Icons.Filled.RadioButtonUnchecked, contentDescription = "", tint = Color.Red)})
 
-        }
+                       }
 
     )
 

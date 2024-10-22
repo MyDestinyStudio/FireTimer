@@ -11,7 +11,7 @@ data class  WorkOutDetail(
     @PrimaryKey
     val id : UUID = UUID.randomUUID(),
     @ColumnInfo(name = "workout_name" )
-    val workOutName:String ,
+    val workOutName:String="" ,
 
     @ColumnInfo(name = "workout_intervals" )
     val workOutPrimaryDetail :List<IntervalsInfo>
@@ -20,14 +20,15 @@ data class  WorkOutDetail(
 )
 
 data class WorkoutUiState(
-    val idW: String? = null,
-    val nameW: String? = null,
-    val intervalList: MutableList <IntervalsInfoIndexed> = mutableListOf()
+    var idW: String? = null,
+    var nameW: String? = null,
+    var intervalList: MutableList <IntervalsInfoIndexed> = mutableListOf()
 )
 
 val initial = WorkOutDetail(workOutName ="New", workOutPrimaryDetail = listOf() )
 
 
-    const val defaultId= "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"
+
 
    val wdTest = WorkOutDetail(id =  UUID.fromString( "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454") , workOutName ="Test", workOutPrimaryDetail = ExpTA)
+val wdTestC = WorkOutDetail(   workOutName ="Test", workOutPrimaryDetail = ExpTUri)
