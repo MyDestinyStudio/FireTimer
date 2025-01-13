@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="intervals">%1$s Διαστήματα |</string>
+    <string name="sets">Σετ %1$s</string>
+    <string name="warm_up">Προθέρμανση</string>
+    <string name="work">Άσκηση</string>
+    <string name="rest">Ξεκούραση</string>
+    <string name="work_rest_number">Αριθμός άσκησης/ξεκούρασης</string>
+    <string name="rest_btw_sets">Διάλειμμα μεταξύ σετ</string>
+    <string name="sets_number">Αριθμός σετ</string>
+    <string name="cool_down">Αποθεραπεία</string>
+    <string name="create_workout">Δημιουργία προπόνησης</string>
+    <string name="update">Ενημέρωση</string>
+    <string name="dismiss">Απόρριψη</string>
+    <string name="update_name">Ενημέρωση ονόματος</string>
+    <string name="workouts">%1$s Προπονήσεις</string>
+    <string name="delete">Διαγραφή</string>
+    <string name="are_you_sure">Είστε σίγουρος;</string>
+    <string name="ok">Εντάξει</string>
+    <string name="are_sure_you_want_to_exit">Είστε βέβαιοι ότι θέλετε να βγείτε;</string>
+    <string name="no">Όχι</string>
+    <string name="yes">Ναι</string>
+    <string name="list">Λίστα</string>
+    <string name="calendar">Ημερολόγιο</string>
+    <string name="home">Αρχική</string>
+    <string name="setting">Ρύθμιση</string>
+    <string name="info">Πληροφορίες</string>
+    <string name="general">Γενικά</string>
+    <string name="notifications">Ειδοποιήσεις</string>
+    <string name="customize_notifications">Προσαρμογή ειδοποιήσεων</string>
+    <string name="customize_it_more_to_fit_your_usage">Προσαρμόστε το περισσότερο για να ταιριάζει στη χρήση σας</string>
+    <string name="timer">Χρονόμετρο</string>
+</resources>

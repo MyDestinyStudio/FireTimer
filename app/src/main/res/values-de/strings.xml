@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="intervals">%1$s Intervalle |</string>
+    <string name="sets">Sätze %1$s</string>
+    <string name="warm_up">Aufwärmen</string>
+    <string name="work">Arbeit</string>
+    <string name="rest">Pause</string>
+    <string name="work_rest_number">Arbeit/Pause Anzahl</string>
+    <string name="rest_btw_sets">Pause zwischen Sätzen</string>
+    <string name="sets_number">Anzahl der Sätze</string>
+    <string name="cool_down">Abkühlen</string>
+    <string name="create_workout">Training erstellen</string>
+    <string name="update">Aktualisieren</string>
+    <string name="dismiss">Schließen</string>
+    <string name="update_name">Name aktualisieren</string>
+    <string name="workouts">%1$s Trainings</string>
+    <string name="delete">Löschen</string>
+    <string name="are_you_sure">Sind Sie sicher?</string>
+    <string name="ok">OK</string>
+    <string name="are_sure_you_want_to_exit">Sind Sie sicher, dass Sie beenden möchten?</string>
+    <string name="no">Nein</string>
+    <string name="yes">Ja</string>
+    <string name="list">Liste</string>
+    <string name="calendar">Kalender</string>
+    <string name="home">Startseite</string>  // Or "Zuhause"
+    <string name="setting">Einstellungen</string>
+    <string name="info">Info</string>
+    <string name="general">Allgemein</string>
+    <string name="notifications">Benachrichtigungen</string>
+    <string name="customize_notifications">Benachrichtigungen anpassen</string>
+    <string name="customize_it_more_to_fit_your_usage">Passen Sie es weiter an Ihre Bedürfnisse an</string>
+    <string name="timer">Timer</string>
+</resources>

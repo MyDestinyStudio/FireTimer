@@ -41,10 +41,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import my.destinyStudio.firetimer.components.IntervalsType
 import my.destinyStudio.firetimer.data.IntervalsInfoIndexed
-import my.destinyStudio.firetimer.navigation.Screens
+import my.destinyStudio.firetimer.navigation.SavedWorkOutScreen
 import my.destinyStudio.firetimer.screens.imagesScreen.ImageDataViewmodel
+import my.destinyStudio.firetimer.screens.settingScreen.SettingsViewModel
 import my.destinyStudio.firetimer.ui.theme.AppColors
 import kotlin.math.roundToInt
 
@@ -53,9 +53,10 @@ import kotlin.math.roundToInt
 
 fun SavedWorkOutEditScreen(
     navController: NavController=NavController(context = LocalContext.current),
-    identifier:String,
+    identifier:String?,
     editWorkoutViewModel: EditWorkoutViewModel= hiltViewModel(),
-    imageDataViewmodel: ImageDataViewmodel= hiltViewModel()
+    imageDataViewmodel: ImageDataViewmodel= hiltViewModel(),
+    settingViewModel: SettingsViewModel = hiltViewModel()
 ){
 
 
@@ -64,7 +65,8 @@ fun SavedWorkOutEditScreen(
     val totalDuration             by editWorkoutViewModel.totalDuration.collectAsState()
     val intervalsNumber           by  editWorkoutViewModel.intervalsNumber.collectAsState()
     val setsNumber                by  editWorkoutViewModel.setsNumber.collectAsState()
-  //  val wName                     by editWorkoutViewModel. workoutUiName.collectAsState()
+    val settings                  by settingViewModel.settings.collectAsState()
+
 
     val listState = rememberLazyListState()
     val context = LocalContext.current
@@ -81,12 +83,12 @@ fun SavedWorkOutEditScreen(
 
 
     BackHandler {
-        navController.popBackStack(route = Screens.SavedWorkOutScreen.route ,inclusive = false)
+      //  navController.navigate( Screens.SavedWorkOutScreen.route )
                  }
 
   LaunchedEffect( key1 = identifier, key2 = isLoaded) {
 if(isLoaded) {
-    editWorkoutViewModel.getWByIdd(identifier)
+    identifier?.let { editWorkoutViewModel.getWByIdd(it) }
 
     imageDataViewmodel.loadImages(context)
     isLoaded = false
@@ -139,7 +141,7 @@ if(isLoaded) {
                        editWorkoutViewModel.undoChange()
                               } ,
                    onBackClick = {
-      navController.popBackStack(route = Screens.SavedWorkOutScreen.route ,inclusive = false)
+      navController.navigate(  SavedWorkOutScreen  )
                    },
 
                )
@@ -204,12 +206,13 @@ if(isLoaded) {
                                        editWorkoutViewModel. removeInterval( index)
                                                     },
                                    addInterval = {
-          val defaultIntervalIndexed=IntervalsInfoIndexed(
-              intervalType =IntervalsType.WORK_OUT,
-              intervalDuration =10000,
-              intervalName ="")
 
-                    editWorkoutViewModel.addInterval(index=index+1,intervalsInfoI=defaultIntervalIndexed)
+
+                    editWorkoutViewModel.addInterval(index=index+1,intervalsInfoI=IntervalsInfoIndexed(
+                        intervalType =settings .defaultIntervalType ,
+                        intervalDuration =settings .defaultIntervalDuration,
+                        intervalName =settings .defaultIntervalName,
+                        uri = settings.defaultIntervalUri))
 
                                                  },
                                    newInterval = {

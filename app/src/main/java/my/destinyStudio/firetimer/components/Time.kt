@@ -59,8 +59,7 @@ fun TimePickerCard(modifier : Modifier = Modifier,
     Card(modifier = Modifier,
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
-
-        ),
+                 ),
         border = BorderStroke(MaterialTheme.dimens.pickerCardBorderTickness, borderColor)
     ) {
         Row(  modifier = Modifier.padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically,
@@ -81,17 +80,17 @@ fun TimePickerCard(modifier : Modifier = Modifier,
                 OutlinedTextField(
                      modifier = Modifier.padding(horizontal = 2.dp)
                          .height(MaterialTheme.dimens.pickerCardSize)
-                         .  width(MaterialTheme.dimens.pickerCardSize)
-                          ,
+                         .  width(MaterialTheme.dimens.pickerCardSize) ,
+
                     value = minutes.intValue.toString(),
                     onValueChange = { value ->
                         minutes.intValue = value.toIntOrNull() ?: 0
 
-                        if (minutes.intValue >minutesRange.last)minutes.intValue=180
+                        if (minutes.intValue >minutesRange.last)minutes.intValue=90
                         if (minutes.intValue < minutesRange.first)minutes.intValue=0
                         if(minutes.intValue<10) minutes.intValue= minutes.intValue.toString().format("%002d", minutes.intValue).toInt()
-                    },textStyle =
-                    LocalTextStyle.current.copy(
+                    },
+               textStyle = LocalTextStyle.current.copy(
                         textAlign = TextAlign.Center,
                         fontSize = MaterialTheme.dimens.pickerCardSFontSize .sp,
                         color = color,
@@ -102,21 +101,17 @@ fun TimePickerCard(modifier : Modifier = Modifier,
 
                     label={ Text(text = "Min", color = color) },
 
-                    colors = OutlinedTextFieldDefaults.
-                    colors(
+                    colors = OutlinedTextFieldDefaults.  colors(
                         focusedTextColor = color,
                         unfocusedTextColor = color,
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                         disabledContainerColor = Color.Transparent,
                         focusedBorderColor = borderColor,
-                        unfocusedBorderColor = borderColor,
-
-
-                        ),
+                        unfocusedBorderColor = borderColor  ),
 
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    //   keyboardActions = KeyboardActions(onDone = null)
+
                 )
 
                 Spacer(modifier = Modifier.width(2.dp))

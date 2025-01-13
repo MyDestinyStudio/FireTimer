@@ -1,10 +1,16 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.dagger.hilt.plugin)
     alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.kotlin.serialization)
 
-    id("com.google.devtools.ksp")
-    id("com.google.dagger.hilt.android")
+
+    alias(libs.plugins.compose.compiler)
+
+
+    alias(libs.plugins.ksp)
+//    id("com.google.dagger.hilt.android")
 
 
 }
@@ -16,7 +22,7 @@ android {
     defaultConfig {
         applicationId = "my.destinyStudio.firetimer"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -48,12 +54,14 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.7"
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
 }
+
 
 dependencies {
 
@@ -65,7 +73,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.compose)
+
+    implementation(libs.navigation.compose)
+
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.core.ktx)
     implementation(libs.androidx.adaptive.android)
@@ -93,18 +103,21 @@ dependencies {
 
     // Dagger+Hilt
 
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
+    implementation(libs.dagger.hilt)
+    ksp(libs.dagger.hilt.compiler)
 
-    ksp (libs.androidx.hilt.compiler)
-    implementation (libs.hilt.navigation.compose)
+     implementation (libs.hilt.navigation.compose)
 
-    implementation(libs.hilt.android.gradle.plugin)
+    implementation(libs.kotlinx.serialization.json)
+
+
 
     //ksp("")\
-       implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
+       implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
 
-    //implementation( "io.coil-kt:coil-compose:2.2.2")
+    implementation (libs.yariksoffice.lingver)
+
+
 
 //coil
     implementation( libs.coil.compose)
@@ -112,7 +125,7 @@ dependencies {
     //Room
     implementation (libs.androidx.room.runtime)
     implementation (libs.androidx.room.ktx)
-    ksp  (libs.androidx.room.compiler)
+     ksp  (libs.androidx.room.compiler)
 
 
     implementation(libs.androidx.datastore.preferences)
@@ -124,17 +137,12 @@ dependencies {
     implementation (libs.kotlinx.coroutines.android)
     implementation (libs.kotlinx.coroutines.play.services)
 
-    //noinspection GradleDependenc
-    implementation (libs.androidx.lifecycle.runtime.ktx.v262)
-    implementation (libs.androidx.lifecycle.viewmodel.compose.v262)
     //LiveData
     implementation (libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.datastore)
+     implementation(libs.protobuf.javalite)
+    implementation(libs.kotlinx.serialization.json)
 
-    implementation(libs.androidx.datastore.preferences)
-
-    //Navigation
-    implementation (libs.androidx.navigation.compose.v275)
-    implementation (libs.hilt.navigation.compose)
 
 
 

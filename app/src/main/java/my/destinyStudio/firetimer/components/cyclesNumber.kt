@@ -42,7 +42,10 @@ import my.destinyStudio.firetimer.ui.theme.dimens
 @Preview
 fun RepeatNumber(
     modifier: Modifier  = Modifier ,
-    imageId : Int = R.drawable.cool_down, label:String="Work/Rest number", initialC:Int=1, repeatValue : (Int) -> Unit={} ){
+    imageId : Int = R.drawable.cool_down, label:String="Work/Rest number",
+    initialC:Int=1, repeatValue : (Int) -> Unit={}
+
+){
     val range = 1..100
     var cycleNumbers  by remember { (mutableIntStateOf(initialC)) }
 

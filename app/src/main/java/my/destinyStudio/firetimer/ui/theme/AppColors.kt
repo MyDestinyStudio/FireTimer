@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 object AppColors {
     val mGray = Color(0xFF969494)
-    val mLightGray= Color(0xFFB3B3B3)
+    val mLightGray= Color(0xFFE8E8E8)
      //val mLightGr   = Color(0xFFFFF4F4)
     val mBlueL= Color(0xFF17AFF3)
    // val mBlueLl= Color(0xFF73D2FD)
@@ -12,10 +12,13 @@ object AppColors {
     val mOrange= Color(0xFFFF541E)
    // val mOrangeL= Color(0xFFFF7042)
   //  val mOrangeLl = Color(0xFFF59576)
-  //  val mYellow= Color(0xFFFFEE57)
+
     val mGreen= Color(0xFFA9EEAC)
-  // val mG =Color(0xFFAA20C2)
- //   val mG3 =Color(0xFF673AB7)
+    val WHITE= Color(0xFFFFFFFF)
+
+    val  SafetyOrange= Color(0xFFFE4601)
+    val Tangelo =Color(0xFFFF7701)
+   val verdigris =Color(0xFF0068ED)
     ////
     val themeBlue =Color( 0, 90, 143)
     val themeDeepCerulean =Color( 0, 131, 179)
@@ -32,7 +35,7 @@ object AppColors {
     //  #fddb6d - Yellow
     val colorYellow = Color(0xFFfddb6d)
 
-    //  #1cbfd8 - Light Blue
+    //    Light Blue
     val colorLightBlue = Color(0xFF1cbfd8)
     //
     val colorLightBlueL = Color(0xFF61E0F3)

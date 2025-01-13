@@ -3,10 +3,12 @@ package my.destinyStudio.firetimer.screens.savedworkouts
 import android.content.res.Configuration
 import android.os.Build
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -34,37 +36,50 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.navOptions
 import my.destinyStudio.firetimer.R
 import my.destinyStudio.firetimer.data.ExercisesViewModel
 import my.destinyStudio.firetimer.data.WorkOutDetail
 import my.destinyStudio.firetimer.data.initial
 import my.destinyStudio.firetimer.data.intervalsExp2
 import my.destinyStudio.firetimer.data.wdTest
-import my.destinyStudio.firetimer.navigation.Screens
+import my.destinyStudio.firetimer.navigation.EditScreen
+import my.destinyStudio.firetimer.navigation.SavedWorkOutScreen
+import my.destinyStudio.firetimer.navigation.ScheduleScreen
+import my.destinyStudio.firetimer.navigation.TimerAScreen
+import my.destinyStudio.firetimer.screens.settingScreen.SettingsViewModel
 import my.destinyStudio.firetimer.ui.theme.AppColors
 import my.destinyStudio.firetimer.ui.theme.dimens
 import my.destinyStudio.firetimer.utils.formatToMMSS
@@ -73,8 +88,12 @@ import java.time.Instant
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SavedWorkOutCards(   exercisesViewModel: ExercisesViewModel = viewModel(),
-                         navController: NavController=NavController(context = LocalContext.current) ){
+fun SavedWorkOutCards(
+    navController: NavController = NavController(context = LocalContext.current),
+    exercisesViewModel: ExercisesViewModel = viewModel(),
+
+    settingViewmodel: SettingsViewModel
+){
 
 
      val workouts = exercisesViewModel.workoutList .collectAsState().value
@@ -84,8 +103,7 @@ fun SavedWorkOutCards(   exercisesViewModel: ExercisesViewModel = viewModel(),
      var selectedWorkoutToDeleteId by remember {  mutableStateOf( "")  }
      var selectedWorkoutToReview by remember {  mutableStateOf( initial)  }
 
-    var offsetX by rememberSaveable {  mutableFloatStateOf(0f) }
-    var offsetY by rememberSaveable { mutableFloatStateOf(0f) }
+
     val configuration = LocalConfiguration.current
   if (showReview){
        ExercisesReviewS(workoutToReview =selectedWorkoutToReview  ){
@@ -102,6 +120,13 @@ fun SavedWorkOutCards(   exercisesViewModel: ExercisesViewModel = viewModel(),
                    }
                              )
 
+    }
+
+    BackHandler {
+        settingViewmodel.indexPage(1)
+       navController.navigate(ScheduleScreen, navOptions { popUpTo(SavedWorkOutScreen){inclusive=true} } )
+
+        Log.d("Screens","BackHandler SavedWorkout")
     }
   Scaffold(modifier = Modifier.fillMaxSize() ,
                topBar ={
@@ -120,15 +145,7 @@ fun SavedWorkOutCards(   exercisesViewModel: ExercisesViewModel = viewModel(),
 
       floatingActionButton = {
           FloatingActionButton(modifier = Modifier.size(MaterialTheme.dimens.floatingActionButton)
-//              .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) } // Apply offset
-//              .pointerInput(Unit) {
-//                  detectDragGestures { change, dragAmount ->
-//                      change.consume() // Consume the drag event
-//                      offsetX += dragAmount.x
-//                      offsetY += dragAmount.y
-//                  }
-//              },
-              ,shape = CircleShape,
+    ,shape = CircleShape,
               containerColor = AppColors.mOrange ,
      onClick = {  exercisesViewModel.addWorkOut(WorkOutDetail(workOutName = currentTimes, workOutPrimaryDetail = intervalsExp2)) }  )
           {   Icon( modifier = Modifier.fillMaxSize() ,imageVector =  Icons.Rounded.Add, contentDescription ="", tint = Color.White)  }
@@ -150,7 +167,7 @@ fun SavedWorkOutCards(   exercisesViewModel: ExercisesViewModel = viewModel(),
                        ) {
 
                            items(workouts) { e ->
-                               ExerciseCard(
+                               ExerciseCardA(
                                    workOutDetail = e,
 
                                    onDeleteClicked = {
@@ -159,7 +176,7 @@ fun SavedWorkOutCards(   exercisesViewModel: ExercisesViewModel = viewModel(),
                                    },
                                    onEditClicked = {
                                        val identy = it
-                                       navController.navigate(Screens.SavedWorkOutEditScreen.route + "/${identy}")
+                                        navController.navigate(  EditScreen( identy) )
 
                                    },
                                    onReviewClicked = {
@@ -169,7 +186,7 @@ fun SavedWorkOutCards(   exercisesViewModel: ExercisesViewModel = viewModel(),
                                    },
                                    onStartClick = {
                                        Log.d("N", e.id.toString())
-                                       navController.navigate(Screens.TimerScreen.route + "/${e.id}")
+                                       navController.navigate(TimerAScreen(e.id.toString()))
 
                                    }
                                )
@@ -193,7 +210,7 @@ fun SavedWorkOutCards(   exercisesViewModel: ExercisesViewModel = viewModel(),
 
 
 @Composable
- @Preview
+ //@Preview
 fun ExerciseCard(
     workOutDetail: WorkOutDetail= wdTest,
     onDeleteClicked : (String) -> Unit={},
@@ -206,6 +223,7 @@ fun ExerciseCard(
             .padding(5.dp)
             .fillMaxWidth()
             .height(200.dp),
+
         colors = CardDefaults.cardColors(containerColor = Color.Red)
 
     ) {
@@ -253,18 +271,15 @@ fun ExerciseCard(
          .fillMaxWidth()
          .weight(1f), horizontalArrangement = Arrangement.Center,  verticalAlignment = Alignment.CenterVertically){
 
-//     Spacer(modifier = Modifier
-//         .fillMaxHeight()
-//         .width(7.dp))
-    // Box (modifier = Modifier.weight(1f)){
+
     CardInfo(modifier = Modifier.weight(1f),  title = "Intervals",  subString = workOutDetail.workOutPrimaryDetail.size.toString() )
-   //  }
+
                  Spacer(modifier = Modifier
                      .fillMaxHeight()
                      .width(7.dp))
-    // Box (modifier = Modifier.weight(1f)){
+
    CardInfo(modifier = Modifier.weight(1f), title = "Duration", subString = formatToMMSS(workOutDetail.workOutPrimaryDetail.sumOf { it.intervalDuration })  )
-   //}
+
 
                 }
 
@@ -297,3 +312,237 @@ fun ExerciseCard(
     }
 
 }
+
+
+
+
+val customShape = object : Shape {
+    override fun createOutline(
+        size: Size ,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+
+        val path = Path().apply {
+            val normalCorner =80f
+            val bigCorner =200f
+
+            arcTo(
+                rect =  Rect(offset = Offset(0f,0f    ),
+                    size = Size(normalCorner,normalCorner)),
+                startAngleDegrees = 180f,
+                sweepAngleDegrees =  90f,
+                forceMoveTo = false
+            )
+
+
+            arcTo(rect =  Rect(offset = Offset(size.width*3/4f-normalCorner,0f),
+                size = Size(normalCorner,normalCorner)),
+                startAngleDegrees = 270f,
+                sweepAngleDegrees = 90f,
+                forceMoveTo = false
+            )
+            //B
+            // lineTo(size.width*3/4f   ,size.height/2f)
+            arcTo(rect =  Rect(offset = Offset(size.width*3/4f  ,size.height/2f -bigCorner  ),
+                size = Size(bigCorner,bigCorner)),
+                startAngleDegrees = 180f,
+                sweepAngleDegrees = -90f,
+                forceMoveTo = false
+            )
+
+
+
+
+            arcTo(
+                rect =  Rect(offset = Offset(size.width-normalCorner ,size.height/2f ),
+                    size = Size(normalCorner,normalCorner)),
+                startAngleDegrees = 270f,
+                sweepAngleDegrees =  90f,
+                forceMoveTo = false
+            )
+
+            arcTo(
+                rect =  Rect(offset = Offset(size.width-normalCorner,size.height-normalCorner    ),
+                    size = Size(normalCorner,normalCorner)),
+                startAngleDegrees = 0f,
+                sweepAngleDegrees =  90f,
+                forceMoveTo = false
+            )
+
+
+            arcTo(
+                rect =  Rect(offset = Offset(0f,size.height -normalCorner    ),
+                    size = Size(normalCorner,normalCorner)),
+                startAngleDegrees = 90f,
+                sweepAngleDegrees =  90f,
+                forceMoveTo = false
+            )
+            close()
+           }
+        return Outline.Generic(path)
+    }
+}
+
+
+@Composable
+@Preview
+fun ExerciseCardA(
+
+    workOutDetail: WorkOutDetail= wdTest,
+    onDeleteClicked : (String) -> Unit={},
+    onEditClicked: (String) -> Unit={},
+    onReviewClicked: (WorkOutDetail) -> Unit={},
+    onStartClick: () -> Unit={}
+) {
+    BoxWithConstraints   {
+
+        IconButton(onClick = {  onStartClick()}, modifier = Modifier
+            .align(Alignment.TopEnd)
+            .size((this.maxWidth/4)-3 .dp),
+            colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Red)) {
+            Icon(modifier = Modifier.fillMaxSize(), imageVector = Icons.Rounded.PlayArrow, contentDescription ="", tint = Color.White )
+
+        }
+             Card(
+            modifier = Modifier
+                .width(this.maxWidth)
+                .height( this.maxWidth / 2 )
+                .clip(
+                    customShape
+                )
+
+            ,colors = CardDefaults.cardColors(containerColor = Color.Red)
+
+        ) {
+                 Row(
+                     Modifier
+                         .fillMaxSize()
+                         .padding(horizontal = 10.dp, vertical = 7.dp)) {
+
+                     Column(modifier = Modifier
+                         .weight(0.5f)
+                     ) {
+
+                         Box( modifier = Modifier
+                             .fillMaxWidth()
+                             .weight(1f), contentAlignment = Alignment.Center) {
+                             Text(
+
+                                 text = workOutDetail.workOutName,
+                                 textAlign = TextAlign.Center,
+                                 color = Color.White,
+                                 maxLines = 1,
+                                 overflow = TextOverflow.Ellipsis,
+
+                                 style = MaterialTheme.typography.bodyLarge,
+                                 fontSize = 30.sp
+
+
+                             )
+                         }
+                         LazyColumn(modifier = Modifier
+                             .weight(1.5f)
+                             .padding(horizontal = 3.dp)) {
+                             itemsIndexed(workOutDetail.workOutPrimaryDetail){
+                                     i,a ->
+                                 IntervalDots(index =i, interval = a )
+
+                             }
+
+                         }
+                         Spacer(modifier = Modifier
+                             .fillMaxWidth()
+                             .height(7.dp))
+                         Row (
+                             Modifier
+                                 .fillMaxWidth()
+                                 .weight(1f), horizontalArrangement = Arrangement.Center,  verticalAlignment = Alignment.CenterVertically){
+
+
+                             CardInfo(modifier = Modifier.weight(1f),  title = "Intervals",  subString = workOutDetail.workOutPrimaryDetail.size.toString() )
+
+                             Spacer(modifier = Modifier
+                                 .fillMaxHeight()
+                                 .width(7.dp))
+
+                             CardInfo(modifier = Modifier.weight(1f), title = "Duration", subString = formatToMMSS(workOutDetail.workOutPrimaryDetail.sumOf { it.intervalDuration })  )
+
+
+                         }
+
+                     }
+
+                     Row(
+                         modifier = Modifier
+                             .weight(0.5f)
+                             .fillMaxHeight(),
+
+                     )  {
+                         Column(
+                             modifier = Modifier
+                                 .weight(0.5f)
+                                 .fillMaxHeight(),
+                             horizontalAlignment = Alignment.CenterHorizontally
+                         ) {
+                             IconButton(
+                                 modifier = Modifier.weight(1f),
+                                 onClick = { onEditClicked(workOutDetail.id.toString()) }) {
+                                 Icon(
+                                     modifier = Modifier.fillMaxSize(),
+                                     imageVector = Icons.Filled.Edit,
+                                     contentDescription = "",
+                                     tint = Color.White
+                                 )
+                             }
+
+                             IconButton(
+                                 modifier = Modifier.weight(1f),
+                                 onClick = { onDeleteClicked(workOutDetail.id.toString()) }) {
+                                 Icon(
+                                     modifier = Modifier.fillMaxSize(),
+                                     imageVector = Icons.Filled.Delete,
+                                     contentDescription = "",
+                                     tint = Color.White
+                                 )
+                             }
+
+
+
+
+                         }
+                         Column(
+                             modifier = Modifier
+                                 .weight(0.5f)
+                                 .fillMaxHeight(),
+                             horizontalAlignment = Alignment.CenterHorizontally
+                         ) {
+                             Box(modifier = Modifier.weight(1f))
+
+                             IconButton(
+                                 modifier = Modifier.weight(1f),
+                                 onClick = { onReviewClicked(workOutDetail) }) {
+                                 Icon(
+                                     modifier = Modifier.fillMaxSize(),
+                                     imageVector = Icons.Filled.RemoveRedEye,
+                                     contentDescription = "",
+                                     tint = Color.White
+                                 )
+                             }
+
+
+                         }
+                     }
+
+                 }
+
+
+
+             }
+
+
+    }
+    }
+
+
+

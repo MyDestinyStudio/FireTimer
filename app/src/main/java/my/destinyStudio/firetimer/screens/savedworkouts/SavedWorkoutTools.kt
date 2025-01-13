@@ -42,7 +42,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -51,6 +50,7 @@ import my.destinyStudio.firetimer.components.IntervalsType
 import my.destinyStudio.firetimer.data.IntervalsInfo
 import my.destinyStudio.firetimer.data.WorkOutDetail
 import my.destinyStudio.firetimer.data.wdTest
+import my.destinyStudio.firetimer.ui.theme.AppColors
 import my.destinyStudio.firetimer.ui.theme.IntervalTypeColors
 import my.destinyStudio.firetimer.ui.theme.dimens
 import my.destinyStudio.firetimer.utils.formatToMMSS
@@ -66,7 +66,7 @@ fun ExercisesReviewS(workoutToReview: WorkOutDetail = wdTest, onDismiss: () -> U
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(Modifier.padding(vertical = 20.dp, horizontal =30.dp),
            ) {
-            Column {
+
                 Column(modifier = Modifier.fillMaxWidth() , horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = workoutToReview.workOutName, textAlign = TextAlign.Center,
                         overflow = TextOverflow.Ellipsis, fontSize = 27.sp)
@@ -117,14 +117,14 @@ fun ExercisesReviewS(workoutToReview: WorkOutDetail = wdTest, onDismiss: () -> U
 
                 }
             }
-        }
+
 
     }
 
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
+//@Preview
 fun  TopAppBarA (title: String="",
   actionButtons:List<Pair<ImageVector,String>> =
                      listOf(
@@ -136,7 +136,7 @@ fun  TopAppBarA (title: String="",
 
     TopAppBar(modifier = Modifier.height(MaterialTheme.dimens.appTopBar),
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor =  Color.Blue ,
+            containerColor = AppColors.verdigris ,
             titleContentColor = MaterialTheme.colorScheme.primary,
         ),
         title = {
@@ -149,13 +149,13 @@ fun  TopAppBarA (title: String="",
                     },
                     fontSize = MaterialTheme.dimens.appTitle.sp,
                   fontWeight = FontWeight.ExtraBold,
-                    color = Color.White
+                    color = AppColors.WHITE
                 )
                 if (title != ""){
                     Text(
                         text = title,
                         fontSize = MaterialTheme.dimens.appTitleSuffix.sp,
-                        color = Color.White
+                        color = AppColors.WHITE
                     )
                 }
             }
@@ -163,7 +163,7 @@ fun  TopAppBarA (title: String="",
         },
         actions = {
             actionButtons.forEach {IconButton(modifier = Modifier.fillMaxHeight(),onClick = {it.second}) {
-                Icon( imageVector = it.first, contentDescription = "", tint = Color.White)
+                Icon( imageVector = it.first, contentDescription = "", tint =AppColors.WHITE)
 
             }  }
 

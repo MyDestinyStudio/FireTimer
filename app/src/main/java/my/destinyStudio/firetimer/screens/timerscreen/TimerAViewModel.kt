@@ -1,14 +1,14 @@
 package my.destinyStudio.firetimer.screens.timerscreen
 
 import android.annotation.SuppressLint
-import android.app.Application
+import android.content.Context
 import android.media.AudioAttributes
 import android.media.SoundPool
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -26,11 +26,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 
-class TimerAViewModel  @Inject constructor(private val repository: WorkoutsRepository,application: Application) :
-    AndroidViewModel(application){
+class TimerAViewModel  @Inject constructor(
+    private val repository: WorkoutsRepository,
+    @SuppressLint("StaticFieldLeak") private val context: Context
+) :  ViewModel() {
 
-    @SuppressLint("StaticFieldLeak")
-    private val context = application.applicationContext
+//
 
     private val  soundPool = SoundPool.Builder()
         .setMaxStreams(1)  // Maximum concurrent streams
@@ -55,13 +56,19 @@ class TimerAViewModel  @Inject constructor(private val repository: WorkoutsRepos
 
     private val _pausedTime = MutableStateFlow<Long?>(null)
     private val pausedTime = _pausedTime.asStateFlow()
-//    private var _exerciseName =  MutableStateFlow  ("")
-//    val  exerciseName: StateFlow<String> =_exerciseName.asStateFlow()
+
 
     private var soundPlayed = false
 
 
-    private val tic = 20L
+    private var tic = 20L
+
+    fun ticModify(value:Long )= viewModelScope.launch  (Dispatchers.IO) {
+
+         tic =value
+
+        Log.d("T","A $tic" )
+    }
 
     private var value =  MutableStateFlow (0f)
 
@@ -94,16 +101,6 @@ class TimerAViewModel  @Inject constructor(private val repository: WorkoutsRepos
     private var _showAlert=  MutableStateFlow  (false)
     val showAlert: StateFlow<Boolean> =_showAlert.asStateFlow()
 
-//    private var _isLoaded=  MutableStateFlow  (false)
-//    val  isLoaded: StateFlow<Boolean> =_isLoaded.asStateFlow()
-//
-//    fun isLoadedFalse()= viewModelScope.launch  (Dispatchers.IO) {
-//
-//        _isLoaded.value = true
-//
-//
-//        Log.d("T","isPause" )
-//    }
 
 
 

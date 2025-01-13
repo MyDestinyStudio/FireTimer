@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="intervals">%1$s intervallen |</string>
+    <string name="sets">Sets %1$s</string>
+    <string name="warm_up">Warming-up</string>
+    <string name="work">Trainen</string>
+    <string name="rest">Rust</string>
+    <string name="work_rest_number">Aantal trainingen/rust</string>
+    <string name="rest_btw_sets">Rust tussen sets</string>
+    <string name="sets_number">Aantal sets</string>
+    <string name="cool_down">Cooling-down</string>
+    <string name="create_workout">Training maken</string>
+    <string name="update">Bijwerken</string>
+    <string name="dismiss">Sluiten</string>
+    <string name="update_name">Naam bijwerken</string>
+    <string name="workouts">%1$s Trainingen</string>
+    <string name="delete">Verwijderen</string>
+    <string name="are_you_sure">Weet je het zeker?</string>
+    <string name="ok">OK</string>
+    <string name="are_sure_you_want_to_exit">Weet je zeker dat je wilt afsluiten?</string>
+    <string name="no">Nee</string>
+    <string name="yes">Ja</string>
+    <string name="list">Lijst</string>
+    <string name="calendar">Kalender</string>
+    <string name="home">Home</string>
+    <string name="setting">Instellingen</string>
+    <string name="info">Info</string>
+    <string name="general">Algemeen</string>
+    <string name="notifications">Meldingen</string>
+    <string name="customize_notifications">Meldingen aanpassen</string>
+    <string name="customize_it_more_to_fit_your_usage">Pas het meer aan om het aan je gebruik aan te passen</string>
+    <string name="timer">Timer</string>
+</resources>

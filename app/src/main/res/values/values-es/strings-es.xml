@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Firetimer</string>
+    <string name="intervals">" %1$s Intervalos |"</string>
+    <string name="sets">" series %1$s"</string>
+    <string name="warm_up">Calentamiento</string>
+    <string name="work">Trabajo</string>
+    <string name="rest">Descanso</string>
+    <string name="work_rest_number">Número de trabajo/descanso</string>
+    <string name="rest_btw_sets">Descanso entre series</string>
+    <string name="sets_number"> Número de series </string>
+    <string name="cool_down">Enfriamiento</string>
+    <string name="create_workout">Crear Entrenamiento</string>
+    <string name="update">Actualizar</string>
+    <string name="dismiss">Descartar</string>
+    <string name="update_name">"Actualizar nombre "</string>
+    <string name="workouts">%1$s Entrenamientos</string>
+    <string name="delete">"Eliminar "</string>
+    <string name="are_you_sure">" ¿Estás Seguro ? "</string>
+    <string name="ok">OK</string>
+    <string name="are_sure_you_want_to_exit">¿Está seguro de que desea salir?</string>
+    <string name="no">No</string>
+    <string name="yes">Sí</string>
+</resources>

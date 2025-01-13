@@ -1,11 +1,16 @@
 package my.destinyStudio.firetimer.screens.timerscreen
 
  
- import android.app.Activity
+ import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.PictureInPictureParams
 import android.content.res.Configuration
+import android.os.Build
 import android.util.Log
+import android.util.Rational
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
@@ -66,93 +71,131 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
+import androidx.navigation.navOptions
 import kotlinx.coroutines.delay
-import my.destinyStudio.firetimer.navigation.Screens
+
+ import my.destinyStudio.firetimer.navigation.StartScreen
+import my.destinyStudio.firetimer.navigation.TimerBScreen
+import my.destinyStudio.firetimer.screens.settingScreen.SettingsViewModel
 import my.destinyStudio.firetimer.ui.theme.dimens
 
 
 //@PreviewScreenSizes
+@SuppressLint("SuspiciousIndentation")
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 
 @Composable
  fun TimerBScreen(
     navController: NavController = NavController(context = LocalContext.current),
     timerBViewModel: TimerBViewModel = hiltViewModel(),
-
+    settingViewModel: SettingsViewModel = hiltViewModel()
 
     ){
 
-    val outerL by timerBViewModel.outer.collectAsState()
-    val innerL by timerBViewModel.inner.collectAsState()
-    val list by timerBViewModel.playingWorkout.collectAsState()
-    val timeLeft by timerBViewModel.curTe.collectAsState()
-    val i by timerBViewModel.index.collectAsState()
-    val isForward by timerBViewModel.isN.collectAsState()
-    val showAlert  by timerBViewModel.showAlert.collectAsState()
-    val isTimerRunning by timerBViewModel.isTimerRunning.collectAsState()
 
-
+    val settings            by settingViewModel.settings.collectAsState()
+    val outerL              by timerBViewModel.outer.collectAsState()
+    val innerL              by timerBViewModel.inner.collectAsState()
+    val list                by timerBViewModel.playingWorkout.collectAsState()
+    val timeLeft            by timerBViewModel.curTe.collectAsState()
+    val i                   by timerBViewModel.index.collectAsState()
+    val isForward           by timerBViewModel.isN.collectAsState()
+    val showAlert           by timerBViewModel.showAlert.collectAsState()
+    val isTimerRunning      by timerBViewModel.isTimerRunning.collectAsState()
 
     val configuration = LocalConfiguration.current
-    val context = LocalContext.current
-    val activity = context as? Activity
+    val context = LocalContext.current as Activity
+   val activity = context as? Activity
 
     val  sWidth by remember { mutableIntStateOf(30) }
-
-
-
-     var isLocked by rememberSaveable { mutableStateOf(false) }
-
-
-
+    var isLocked by rememberSaveable { mutableStateOf(false) }
     var exitAlert   by rememberSaveable { mutableStateOf(false) }
-
-
     var  hasRun  by rememberSaveable { mutableStateOf(false) }
+    var isPip by rememberSaveable { mutableStateOf(false) }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    LaunchedEffect(key1 = Unit) {
-        if (!hasRun )  {
-            timerBViewModel.startTimer()
-        hasRun =true
-            Log.d("D","ReLaunched B ")
+    val aspectRatio = Rational(1, 1) // Adjust as needed
+    val pipParams = PictureInPictureParams.Builder()
+        .setAspectRatio( aspectRatio) 
+        .build()
+
+
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_PAUSE) {
+
+            isPip=true
+                Log.d("D","OnPause")
+
+            } else if (event == Lifecycle.Event.ON_RESUME || event == Lifecycle.Event.ON_START) {
+                isPip=false
+                  Log.d("D","OnStart onResume")
+                }
+
+            }
+
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+           Log.d("D","OnDispose ")
+              timerBViewModel.resetTimer()
+              isPip=false
+               lifecycleOwner.lifecycle.removeObserver(observer)
+
+               activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                }
+
         }
 
-
-
-
-    }
 
     if (isTimerRunning) {  activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
     else { activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
 
 
-    DisposableEffect(Unit) {
-        Log.d("D","ReLaunchedDisposed")
-        onDispose {
 
-            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    LaunchedEffect(key1 = Unit) {
+
+        timerBViewModel.ticModify(settings.tic )
+        timerBViewModel.vibrationModify(settings.vibrationEnabled )
+
+        if (!hasRun )  {
+
+            timerBViewModel.startTimer()
+
+        hasRun =true
+            Log.d("D","ReLaunched B ")
         }
 
     }
 
     if (showAlert) {
-        LaunchedEffect(Unit) {
-          delay(3000) // Show alert for 3 seconds
-  navController.popBackStack(route =Screens.StartScreen.route,inclusive = false)
-            timerBViewModel.resetTimer()
-    }
+
+            LaunchedEffect(Unit) {
+                isPip=false
+               // if (isPip) { context.finish()}
+                delay(3000) // Show alert for 3 seconds
+                navController.navigate(  StartScreen,
+                    navOptions { popUpTo(TimerBScreen){inclusive=true} }  )
+                timerBViewModel.resetTimer()
+
+        }
 
         AlertDialog(
             onDismissRequest = {
                 timerBViewModel.resetTimer()
-                navController.popBackStack(route =Screens.StartScreen.route,inclusive = false)},
+                navController.navigate(  StartScreen  )},
             title = { Text("Alert Dialog") },
             text = { Text("This is an alert dialog.") },
             confirmButton = {
                 Button(onClick = {
                     timerBViewModel.resetTimer()
-                    navController.popBackStack(route =Screens.StartScreen.route,inclusive = false)
+                    navController.navigate(  StartScreen  )
                 }) {
                     Text("OK")
                 }
@@ -181,7 +224,7 @@ import my.destinyStudio.firetimer.ui.theme.dimens
             },
             confirmButton = {
                 Button(onClick = {
-                    navController.popBackStack(route =Screens.StartScreen.route,inclusive = false)
+                    navController.navigate( StartScreen  )
                     timerBViewModel.resetTimer()
 
                 }) {
@@ -194,309 +237,343 @@ import my.destinyStudio.firetimer.ui.theme.dimens
 
     BackHandler {   exitAlert=true  }
 
-
-  Surface(modifier = Modifier
-          .fillMaxSize()
-          ){
-
-  when {
-                  configuration.orientation== Configuration.ORIENTATION_LANDSCAPE &&configuration.screenHeightDp<480 -> {
-
-                      Row(modifier = Modifier.fillMaxSize()) {
-
-                          ExercisesIndicator(modifier = Modifier.zIndex(1f).background(color = Color.White)
-                              .padding(horizontal = 7.dp)
-                              .width((configuration.screenWidthDp / 2 - 150).dp)
-                              .fillMaxHeight()   ,
-                              index = i,
-                              listOfExercise = list?.workOutPrimaryDetail ?: listOf(),
-                              isPlus = isForward
-                          )
-                          Box(modifier = Modifier.weight(0.8f).zIndex(0f)
-                              ,contentAlignment = Alignment.Center ) {
-
-      androidx.compose.animation.AnimatedVisibility(
-                                  modifier = Modifier ,
-                                  visible = list?.workOutPrimaryDetail?.getOrNull(i)?.uri == null,
-                                  enter = slideInHorizontally(animationSpec = tween(durationMillis = 500)) { if (isForward) it else if (!isForward) -it else it },
-                                  exit = slideOutHorizontally { if (isForward) -it else if (!isForward) it else -it }
-                              ) {
-
-                                  BoxWithConstraints (   contentAlignment = Alignment.Center) {
-
-                                      TimeText(
-                                          timeLeft = timeLeft, textSize =MaterialTheme.dimens.timerLeftText
-
-                                      )
-
-                                      Arcs(
-                                          sizeArc =  (this.maxHeight.value.toInt()  -(sWidth+10) ).dp
-                                          ,  strokeWidth = sWidth,
-                                          valueInner = innerL,
-                                          valueOuter = outerL
-                                      )
-                                  }
-                              }
-
-
-
-
-
-
-                          }
-
-                          Column(modifier = Modifier.zIndex(1f)
-                              .background(color = Color.White)
-                              .border(width = 1.dp, color = Color.Gray) , horizontalAlignment = Alignment.CenterHorizontally) {
-                              SlideCounter(
-                                  modifier = Modifier.weight(1f).padding(horizontal =5.dp),
-
-                                  count = i + 1,
-                                  size = list?.workOutPrimaryDetail?.size ?: 0,
-                                  fontSize = 25,
-                                  isPlus = isForward
-                              )
-
-
-
-
-                              IconButton(modifier = Modifier.weight(1f)
-                                  ,
-                                  onClick = { if (isTimerRunning) timerBViewModel.pauseTimer() else if (!isTimerRunning) timerBViewModel.startTimer() },
-                                  enabled = !isLocked) {
-                                  Icon(
-                                      modifier = Modifier.fillMaxSize(),
-                                      imageVector = if (isTimerRunning) {
-                                          Icons.Filled.Pause
-                                      } else if (!isTimerRunning) {
-                                          Icons.Filled.PlayArrow
-                                      } else {
-                                          Icons.Filled.Pause
-                                      },
-                                      contentDescription = ""
-                                  )
-                              }
-                              IconButton(modifier = Modifier.weight(1f),
-                                  onClick = { isLocked = !isLocked }) {
-                                  Icon(
-                                      modifier = Modifier.fillMaxSize(),
-                                      imageVector = if (isLocked) {
-                                          Icons.Filled.Lock
-                                      } else if (!isLocked) {
-                                          Icons.Outlined.LockOpen
-                                      } else {
-                                          Icons.Filled.Lock
-                                      }, contentDescription = ""
-                                  )
-                              }
-
-
-                              IconButton(modifier = Modifier.weight(1f),
-                                  onClick = { timerBViewModel.previousInterval() },
-                                  enabled = i != 0 && !isLocked
-                              ) {
-                                  Icon(
-                                      modifier = Modifier.fillMaxSize(),
-                                      imageVector = Icons.Rounded.KeyboardDoubleArrowLeft,
-                                      contentDescription = ""
-                                  )
-                              }
-
-                              IconButton(
-                                  modifier = Modifier.weight(1f),
-                                  onClick = {
-                                      timerBViewModel.nextInterval()
-                                  },
-                                  enabled = i != list?.workOutPrimaryDetail?.lastIndex && !isLocked,
-
-                                  ) {
-                                  Icon(
-                                      modifier = Modifier.fillMaxSize(),
-                                      imageVector = Icons.Rounded.KeyboardDoubleArrowRight,
-                                      contentDescription = ""
-                                  )
-
-                              }
-
-
-
-                          }
-
-
-                      }
-
-                  }
-                  else ->{
-                      ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-
-                          val (ppButton, bottomCard, lockButton , counter, noImage ) = createRefs()
-
-                          SlideCounter(
-                              modifier = Modifier.constrainAs(counter) {
-                                  top.linkTo(parent.top, margin = 5.dp)
-                                  start.linkTo(ppButton.end)
-                                  end.linkTo(lockButton.start)
-
-                              }.height(MaterialTheme.dimens.timerIcons),
-                              count = i + 1,
-                              size = list?.workOutPrimaryDetail?.size ?: 0,
-                              fontSize = MaterialTheme.dimens.sliderCounterFont,
-
-
-                              isPlus = isForward
-                          )
-
-
-
-                          IconButton(
-                              modifier = Modifier
-                                  .size(MaterialTheme.dimens.timerIcons)
-                                  .constrainAs(ppButton) {
-                                      top.linkTo(parent.top, margin = 5.dp)
-                                      start.linkTo(parent.start)
-
-                                  },
-                              onClick = { if (isTimerRunning) timerBViewModel.pauseTimer() else if (!isTimerRunning) timerBViewModel.startTimer() },
-                              enabled = !isLocked
-                          ) {
-                              Icon(
-                                  modifier = Modifier.fillMaxSize(),
-                                  imageVector = if (isTimerRunning) {
-                                      Icons.Filled.Pause
-                                  } else if (!isTimerRunning) {
-                                      Icons.Filled.PlayArrow
-                                  } else {
-                                      Icons.Filled.Pause
-                                  },
-                                  contentDescription = ""
-                              )
-                          }
-                          IconButton(modifier = Modifier
-                              .size(MaterialTheme.dimens.timerIcons)
-                              .constrainAs(lockButton) {
-                                  top.linkTo(parent.top, margin = 5.dp)
-                                  end.linkTo(parent.end)
-
-                              }, onClick = { isLocked = !isLocked }) {
-                              Icon(
-                                  modifier = Modifier.fillMaxSize(),
-                                  imageVector = if (isLocked) {
-                                      Icons.Filled.Lock
-                                  } else if (!isLocked) {
-                                      Icons.Outlined.LockOpen
-                                  } else {
-                                      Icons.Filled.Lock
-                                  }, contentDescription = ""
-                              )
-                          }
-
-
-
-
-
-
-
-
-
-
-  BoxWithConstraints  (  modifier = Modifier.constrainAs(noImage) {
-
-                                  top.linkTo(counter.bottom )
-                                  bottom.linkTo(bottomCard.top )
-                                  start.linkTo(parent.start )
-                                  end.linkTo(parent.end )
-                                  height = Dimension.wrapContent
-                                  width = Dimension.wrapContent
-                              } .border(2.dp, color = Color.Green), contentAlignment = Alignment.Center  ) {
-                                  TimeText(
-                                      timeLeft = timeLeft, textSize = MaterialTheme.dimens.timerLeftText
-                                  )
-
-                                  Arcs(
-                                      sizeArc = when(configuration.orientation) {
-
-                                          Configuration.ORIENTATION_PORTRAIT ->{(this.maxWidth.value -30 ).dp}
-                                          Configuration.ORIENTATION_LANDSCAPE ->{(this.maxHeight.value-30).dp}
-                                          else -> 200.dp
-
-
-                                      },
-                                      //-  sWidth
-                                      strokeWidth = sWidth,
-                                      valueInner = innerL,
-                                      valueOuter = outerL
-                                  )
-                              }
-
-
-
-                          Card(
-                              Modifier
-                                  .fillMaxWidth()
-                                  .constrainAs(bottomCard) {
-                                      start.linkTo(parent.start)
-                                      end.linkTo(parent.end)
-                                      bottom.linkTo(parent.bottom)
-                                  },
-                              colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-                          ) {
-                              Row(
-                                  modifier = Modifier.height((configuration.screenHeightDp / 4).dp),
-                                  verticalAlignment = Alignment.CenterVertically
-                              ) {
-
-                                  IconButton(
-                                      modifier = Modifier.size(MaterialTheme.dimens.timerIcons),
-                                      onClick = { timerBViewModel.previousInterval() },
-                                      enabled = i != 0 && !isLocked
-                                  ) {
-                                      Icon(
-                                          modifier = Modifier.fillMaxSize(),
-                                          imageVector = Icons.Rounded.KeyboardDoubleArrowLeft,
-                                          contentDescription = ""
-                                      )
-                                  }
-
-                                  Box(modifier = Modifier.weight(1f)) {
-                                      ExercisesIndicator(
-                                          index = i,
-                                          listOfExercise = list?.workOutPrimaryDetail ?: listOf(),
-                                          isPlus = isForward
-                                      )
-                                  }
-
-
-                                  IconButton(
-                                      modifier = Modifier.size(MaterialTheme.dimens.timerIcons),
-                                      onClick = {
-                                          timerBViewModel.nextInterval()
-                                      },
-                                      enabled = i != list?.workOutPrimaryDetail?.lastIndex && !isLocked,
-
-                                      ) {
-                                      Icon(
-                                          modifier = Modifier.fillMaxSize(),
-                                          imageVector = Icons.Rounded.KeyboardDoubleArrowRight,
-                                          contentDescription = ""
-                                      )
-
-                                  }
-                              }
-
-                          }
-                      }
-                  }
-
-              }
-
-
-////
-
-
-
-
-
-          }
+    if ( isPip &&isTimerRunning){
+        context.enterPictureInPictureMode(pipParams)
+        FloatingTimerTest(innerL = innerL,
+            outerL = outerL,
+            timeLeft = timeLeft,
+//            onLeftClick ={timerBViewModel.previousInterval()} ,
+//            onRightClick = {timerBViewModel.nextInterval()}
+
+        )
+
+    }
+  else
+      //if (!isPip)
+  {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+
+            when {
+                configuration.orientation == Configuration.ORIENTATION_LANDSCAPE && configuration.screenHeightDp < 480 -> {
+
+                    Row(modifier = Modifier.fillMaxSize()) {
+
+                        ExercisesIndicator(
+                            modifier = Modifier
+                                .zIndex(1f)
+                                .background(color = Color.White)
+                                .padding(horizontal = 7.dp)
+                                .width((configuration.screenWidthDp / 2 - 150).dp)
+                                .fillMaxHeight(),
+                            index = i,
+                            listOfExercise = list?.workOutPrimaryDetail ?: listOf(),
+                            isPlus = isForward
+                        )
+                        Box(
+                            modifier = Modifier
+                                .weight(0.8f)
+                                .zIndex(0f),
+                            contentAlignment = Alignment.Center
+                        ) {
+
+                            androidx.compose.animation.AnimatedVisibility(
+                                modifier = Modifier,
+                                visible = list?.workOutPrimaryDetail?.getOrNull(i)?.uri == null,
+                                enter = slideInHorizontally(animationSpec = tween(durationMillis = 500)) { if (isForward) it else if (!isForward) -it else it },
+                                exit = slideOutHorizontally { if (isForward) -it else if (!isForward) it else -it }
+                            ) {
+
+                                BoxWithConstraints(contentAlignment = Alignment.Center) {
+
+                                    TimeText(
+                                        timeLeft = timeLeft,
+                                        textSize = MaterialTheme.dimens.timerLeftText
+
+                                    )
+
+                                    Arcs(
+                                        sizeArc = (this.maxHeight.value.toInt() - (sWidth + 10)).dp,
+                                        strokeWidth = sWidth,
+                                        valueInner = innerL,
+                                        valueOuter = outerL
+                                    )
+                                }
+                            }
+
+
+                        }
+
+                        Column(
+                            modifier = Modifier
+                                .zIndex(1f)
+                                .background(color = Color.White)
+                                .border(width = 1.dp, color = Color.Gray),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            SlideCounter(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 5.dp),
+
+                                count = i + 1,
+                                size = list?.workOutPrimaryDetail?.size ?: 0,
+                                fontSize = 25,
+                                isPlus = isForward
+                            )
+
+
+
+
+                            IconButton(
+                                modifier = Modifier.weight(1f),
+                                onClick = { if (isTimerRunning) timerBViewModel.pauseTimer() else if (!isTimerRunning) timerBViewModel.startTimer() },
+                                enabled = !isLocked
+                            ) {
+                                Icon(
+                                    modifier = Modifier.fillMaxSize(),
+                                    imageVector = if (isTimerRunning) {
+                                        Icons.Filled.Pause
+                                    } else if (!isTimerRunning) {
+                                        Icons.Filled.PlayArrow
+                                    } else {
+                                        Icons.Filled.Pause
+                                    },
+                                    contentDescription = ""
+                                )
+                            }
+                            IconButton(modifier = Modifier.weight(1f),
+                                onClick = { isLocked = !isLocked }) {
+                                Icon(
+                                    modifier = Modifier.fillMaxSize(),
+                                    imageVector = if (isLocked) {
+                                        Icons.Filled.Lock
+                                    } else if (!isLocked) {
+                                        Icons.Outlined.LockOpen
+                                    } else {
+                                        Icons.Filled.Lock
+                                    }, contentDescription = ""
+                                )
+                            }
+
+
+                            IconButton(
+                                modifier = Modifier.weight(1f),
+                                onClick = { timerBViewModel.previousInterval() },
+                                enabled = i != 0 && !isLocked
+                            ) {
+                                Icon(
+                                    modifier = Modifier.fillMaxSize(),
+                                    imageVector = Icons.Rounded.KeyboardDoubleArrowLeft,
+                                    contentDescription = ""
+                                )
+                            }
+
+                            IconButton(
+                                modifier = Modifier.weight(1f),
+                                onClick = {
+                                    timerBViewModel.nextInterval()
+                                },
+                                enabled = i != list?.workOutPrimaryDetail?.lastIndex && !isLocked,
+
+                                ) {
+                                Icon(
+                                    modifier = Modifier.fillMaxSize(),
+                                    imageVector = Icons.Rounded.KeyboardDoubleArrowRight,
+                                    contentDescription = ""
+                                )
+
+                            }
+
+
+                        }
+
+
+                    }
+
+                }
+
+                else -> {
+                    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+
+                        val (ppButton, bottomCard, lockButton, counter, noImage) = createRefs()
+
+                        SlideCounter(
+                            modifier = Modifier
+                                .constrainAs(counter) {
+                                    top.linkTo(parent.top, margin = 5.dp)
+                                    start.linkTo(ppButton.end)
+                                    end.linkTo(lockButton.start)
+
+                                }
+                                .height(MaterialTheme.dimens.timerIcons),
+                            count = i + 1,
+                            size = list?.workOutPrimaryDetail?.size ?: 0,
+                            fontSize = MaterialTheme.dimens.sliderCounterFont,
+
+
+                            isPlus = isForward
+                        )
+
+
+
+                        IconButton(
+                            modifier = Modifier
+                                .size(MaterialTheme.dimens.timerIcons)
+                                .constrainAs(ppButton) {
+                                    top.linkTo(parent.top, margin = 5.dp)
+                                    start.linkTo(parent.start)
+
+                                },
+                            onClick = { if (isTimerRunning) timerBViewModel.pauseTimer() else if (!isTimerRunning) timerBViewModel.startTimer() },
+                            enabled = !isLocked
+                        ) {
+                            Icon(
+                                modifier = Modifier.fillMaxSize(),
+                                imageVector = if (isTimerRunning) {
+                                    Icons.Filled.Pause
+                                } else if (!isTimerRunning) {
+                                    Icons.Filled.PlayArrow
+                                } else {
+                                    Icons.Filled.Pause
+                                },
+                                contentDescription = ""
+                            )
+                        }
+                        IconButton(modifier = Modifier
+                            .size(MaterialTheme.dimens.timerIcons)
+                            .constrainAs(lockButton) {
+                                top.linkTo(parent.top, margin = 5.dp)
+                                end.linkTo(parent.end)
+
+                            }, onClick = { isLocked = !isLocked }) {
+                            Icon(
+                                modifier = Modifier.fillMaxSize(),
+                                imageVector = if (isLocked) {
+                                    Icons.Filled.Lock
+                                } else if (!isLocked) {
+                                    Icons.Outlined.LockOpen
+                                } else {
+                                    Icons.Filled.Lock
+                                }, contentDescription = ""
+                            )
+                        }
+
+
+
+
+
+
+
+
+
+
+                        BoxWithConstraints(modifier = Modifier
+                            .constrainAs(noImage) {
+
+                                top.linkTo(counter.bottom)
+                                bottom.linkTo(bottomCard.top)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                                height = Dimension.wrapContent
+                                width = Dimension.wrapContent
+                            }
+                            .border(2.dp, color = Color.Green), contentAlignment = Alignment.Center) {
+                            TimeText(
+                                timeLeft = timeLeft, textSize = MaterialTheme.dimens.timerLeftText
+                            )
+
+                            Arcs(
+                                sizeArc = when (configuration.orientation) {
+
+                                    Configuration.ORIENTATION_PORTRAIT -> {
+                                        (this.maxWidth.value - 30).dp
+                                    }
+
+                                    Configuration.ORIENTATION_LANDSCAPE -> {
+                                        (this.maxHeight.value - 30).dp
+                                    }
+
+                                    else -> 200.dp
+
+
+                                },
+                                //-  sWidth
+                                strokeWidth = sWidth,
+                                valueInner = innerL,
+                                valueOuter = outerL
+                            )
+                        }
+
+
+
+                        Card(
+                            Modifier
+                                .fillMaxWidth()
+                                .constrainAs(bottomCard) {
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                    bottom.linkTo(parent.bottom)
+                                },
+                            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+                        ) {
+                            Row(
+                                modifier = Modifier.height((configuration.screenHeightDp / 4).dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+
+                                IconButton(
+                                    modifier = Modifier.size(MaterialTheme.dimens.timerIcons),
+                                    onClick = { timerBViewModel.previousInterval() },
+                                    enabled = i != 0 && !isLocked
+                                ) {
+                                    Icon(
+                                        modifier = Modifier.fillMaxSize(),
+                                        imageVector = Icons.Rounded.KeyboardDoubleArrowLeft,
+                                        contentDescription = ""
+                                    )
+                                }
+
+                                Box(modifier = Modifier.weight(1f)) {
+                                    ExercisesIndicator(
+                                        index = i,
+                                        listOfExercise = list?.workOutPrimaryDetail ?: listOf(),
+                                        isPlus = isForward
+                                    )
+                                }
+
+
+                                IconButton(
+                                    modifier = Modifier.size(MaterialTheme.dimens.timerIcons),
+                                    onClick = {
+                                        timerBViewModel.nextInterval()
+                                    },
+                                    enabled = i != list?.workOutPrimaryDetail?.lastIndex && !isLocked,
+
+                                    ) {
+                                    Icon(
+                                        modifier = Modifier.fillMaxSize(),
+                                        imageVector = Icons.Rounded.KeyboardDoubleArrowRight,
+                                        contentDescription = ""
+                                    )
+
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+            }
+
+
+            ////
+
+
+        }
+    }
 
 
 

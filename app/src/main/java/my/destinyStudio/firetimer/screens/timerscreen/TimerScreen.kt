@@ -1,6 +1,6 @@
 package my.destinyStudio.firetimer.screens.timerscreen
 
-import android.annotation.SuppressLint
+
 import android.app.Activity
 import android.content.res.Configuration
 import android.util.Log
@@ -44,7 +44,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -64,22 +63,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.navOptions
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import kotlinx.coroutines.delay
 import my.destinyStudio.firetimer.R
-import my.destinyStudio.firetimer.navigation.Screens
+import my.destinyStudio.firetimer.navigation.StartScreen
+import my.destinyStudio.firetimer.navigation.TimerAScreen
+import my.destinyStudio.firetimer.screens.settingScreen.SettingsViewModel
 import my.destinyStudio.firetimer.ui.theme.dimens
 
 
 //@Preview
-@SuppressLint("SwitchIntDef")
+
 @Composable
-fun TimerScreen(navController: NavHostController , timerAViewModel: TimerAViewModel = viewModel(), identifier: String) {
+fun TimerScreen(navController: NavHostController,
+                timerAViewModel: TimerAViewModel = hiltViewModel(),
+                settingViewModel: SettingsViewModel = hiltViewModel(),
+                identifier: String?) {
 
-
+    val settings                  by settingViewModel.settings.collectAsState()
     val outerL by timerAViewModel.outer.collectAsState()
     val innerL by timerAViewModel.inner.collectAsState()
     val list by timerAViewModel.playingWorkout.collectAsState()
@@ -88,8 +93,6 @@ fun TimerScreen(navController: NavHostController , timerAViewModel: TimerAViewMo
     val isForward by timerAViewModel.isN.collectAsState()
     val showAlert  by timerAViewModel.showAlert.collectAsState()
     val isTimerRunning by timerAViewModel.isTimerRunning.collectAsState()
-
-
 
     var isWorkoutLoaded  by rememberSaveable { mutableStateOf(true) }
     var isLocked by rememberSaveable { mutableStateOf(false) }
@@ -101,52 +104,93 @@ fun TimerScreen(navController: NavHostController , timerAViewModel: TimerAViewMo
     val activity = context as  Activity
 
 
-    LaunchedEffect( key1 = identifier, key2 = isWorkoutLoaded) {
-        Log.d("D","ReLaunched")
-        Log.d("D","${configuration.screenHeightDp}")
-        Log.d("D","${configuration.screenWidthDp}")
+//     var showFloatingTimer by rememberSaveable { mutableStateOf(false) }
+//    val lifecycleOwner = LocalLifecycleOwner.current
 
-        timerAViewModel.retrieveW(identifier)
 
-        isWorkoutLoaded = true
-        timerAViewModel.playingWorkout.collect {
-            workout ->  if (workout != null) {
-               timerAViewModel.startTimer()
-            }
-        }
-
-                         }
+//    DisposableEffect(lifecycleOwner) {
+//        val observer = LifecycleEventObserver { _, event ->
+//            if (  event == Lifecycle.Event.ON_PAUSE) {
+//                showFloatingTimer = true
+//
+//
+//     Intent(context, FloatingTimerService::class.java).also {
+//         it.action = FloatingTimerService.Actions.START.toString()
+//        context. startService(it)
+//
+//         Log.d("D","Service Launched ")
+//
+//                 }
+//                  Log.d("D","To the for Ground")
+//
+//            } else if (event == Lifecycle.Event.ON_RESUME || event == Lifecycle.Event.ON_START) {
+//                showFloatingTimer = false
+//                Intent(context, FloatingTimerService::class.java).also {
+//                    it.action = FloatingTimerService.Actions.STOP.toString()
+//                    context.startService(it)
+//
+//    Log.d("D","Services stopped ")
+//                }
+//                Log.d("D","To the for Ground")
+//            }
+//        }
+//
+//        lifecycleOwner.lifecycle.addObserver(observer)
+//        onDispose {
+//            Intent(context, FloatingTimerService::class.java).also {
+//                it.action = FloatingTimerService.Actions.STOP.toString()
+//                context.startService(it)
+//
+//                Log.d("D","Services stopped ")
+//                  }
+//            lifecycleOwner.lifecycle.removeObserver(observer)
+//            activity.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+//        }
+//    }
 
     if (isTimerRunning) {  activity.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
     else { activity.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
 
 
-    DisposableEffect(Unit) {
-        Log.d("D","Dispose")
-        onDispose {
 
-            activity.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    LaunchedEffect( key1 = identifier, key2 = isWorkoutLoaded) {
+        Log.d("D","ReLaunched")
+        Log.d("D","${configuration.screenHeightDp}")
+        Log.d("D","${configuration.screenWidthDp}")
+        timerAViewModel.ticModify(settings.tic )
+        identifier?.let { timerAViewModel.retrieveW(it) }
+
+        isWorkoutLoaded = true
+        timerAViewModel.playingWorkout.collect {
+                workout ->  if (workout != null) {
+            timerAViewModel.startTimer()
+        }
         }
 
     }
 
+
+
     if (showAlert) {
         LaunchedEffect(Unit) {
             delay(3000) // Show alert for 3 seconds
-            navController.popBackStack(route =Screens.StartScreen.route,inclusive = false)
-            timerAViewModel.resetTimer()
+            navController.navigate(  StartScreen ,
+                navOptions { popUpTo(TimerAScreen("")){inclusive=true} }  )
+          //  timerAViewModel.resetTimer()
         }
 
         AlertDialog(
             onDismissRequest = {
                 timerAViewModel.resetTimer()
-                navController.popBackStack(route =Screens.StartScreen.route,inclusive = false)},
+                navController.navigate(  StartScreen ,
+                    navOptions { popUpTo(TimerAScreen("")){inclusive=true} } )},
             title = { Text("Alert Dialog") },
             text = { Text("This is an alert dialog.") },
             confirmButton = {
                 Button(onClick = {
                     timerAViewModel.resetTimer()
-                    navController.popBackStack(route =Screens.StartScreen.route,inclusive = false)
+                    navController.navigate(   StartScreen,
+                        navOptions { popUpTo(TimerAScreen("")){inclusive=true} }   )
                 }) {
                     Text(stringResource(R.string.ok))
                 }
@@ -160,8 +204,7 @@ fun TimerScreen(navController: NavHostController , timerAViewModel: TimerAViewMo
             onDismissRequest = {
                 exitAlert = false
                 timerAViewModel.startTimer()
-
-            },
+                        },
             title = { Text(stringResource(R.string.are_sure_you_want_to_exit)) },
 
             dismissButton = {
@@ -176,7 +219,8 @@ fun TimerScreen(navController: NavHostController , timerAViewModel: TimerAViewMo
             },
             confirmButton = {
                 Button(onClick = {
-                    navController.popBackStack(route =Screens.StartScreen.route,inclusive = false)
+                    navController.navigate(  StartScreen ,
+                        navOptions { popUpTo(TimerAScreen("")){inclusive=true} }  )
                     timerAViewModel.resetTimer()
 
                 }) {
@@ -187,15 +231,12 @@ fun TimerScreen(navController: NavHostController , timerAViewModel: TimerAViewMo
     }
 
 
-    BackHandler { exitAlert=true  }
-
-
+    BackHandler { exitAlert=true }
 
         Surface(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-
             when {
                 configuration.orientation==Configuration.ORIENTATION_LANDSCAPE &&configuration.screenHeightDp<480 -> {
 

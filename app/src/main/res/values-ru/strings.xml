@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="intervals">%1$s Интервалы |</string>
+    <string name="sets">Сеты %1$s</string>
+    <string name="warm_up">Разминка</string>
+    <string name="work">Работа</string>
+    <string name="rest">Отдых</string>
+    <string name="work_rest_number">Количество работы/отдыха</string>
+    <string name="rest_btw_sets">Отдых между сетами</string>
+    <string name="sets_number">Количество сетов</string>
+    <string name="cool_down">Заминка</string>
+    <string name="create_workout">Создать тренировку</string>
+    <string name="update">Обновить</string>
+    <string name="dismiss">Закрыть</string>
+    <string name="update_name">Обновить название</string>
+    <string name="workouts">%1$s Тренировки</string>
+    <string name="delete">Удалить</string>
+    <string name="are_you_sure">Вы уверены?</string>
+    <string name="ok">ОК</string>
+    <string name="are_sure_you_want_to_exit">Вы уверены, что хотите выйти?</string>
+    <string name="no">Нет</string>
+    <string name="yes">Да</string>
+    <string name="list">Список</string>
+    <string name="calendar">Календарь</string>
+    <string name="home">Главная</string>
+    <string name="setting">Настройки</string>
+    <string name="info">Информация</string>
+    <string name="general">Общие</string>
+    <string name="notifications">Уведомления</string>
+    <string name="customize_notifications">Настроить уведомления</string>
+    <string name="customize_it_more_to_fit_your_usage">Настройте его подробнее, чтобы он соответствовал вашим потребностям</string>
+    <string name="timer">Таймер</string>
+</resources>

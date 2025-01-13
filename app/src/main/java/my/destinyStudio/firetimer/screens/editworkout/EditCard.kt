@@ -195,12 +195,13 @@ onSoundClicked : () -> Unit={},
 
     }
 
-    Card(modifier = Modifier
+    Card(modifier =modifier
         .fillMaxWidth()
         .height(150.dp)
         , colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         elevation = CardDefaults.cardElevation(defaultElevation = elevation.dp)) {
-        Row(modifier = Modifier
+
+         Row(modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(backColor)),
             verticalAlignment = Alignment.CenterVertically
@@ -208,8 +209,7 @@ onSoundClicked : () -> Unit={},
         ) {
 
 
-
-     Column (modifier = Modifier
+  Column (modifier = Modifier
          .padding(3.dp)
          .weight(1f)  ,
          horizontalAlignment = Alignment.CenterHorizontally

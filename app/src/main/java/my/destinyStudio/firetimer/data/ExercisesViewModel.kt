@@ -1,5 +1,6 @@
 package my.destinyStudio.firetimer.data
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,6 +37,8 @@ import javax.inject.Inject
                     }
 
             }
+        Log.d("EVM","Initial Block Launched")
+
 
         }
     fun loadW(warmUpD:Long , workOutD:Long  , restD:Long , workRestC:Int , restBtSets:Long , setsC :Int , coolDownD:Long)=viewModelScope.launch (Dispatchers.IO){

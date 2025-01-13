@@ -95,7 +95,7 @@ fun Arcs(sizeArc: Dp =200.dp, strokeWidth:Int=10,
 
     }
 }
-@Preview
+//@Preview
 @Composable
 
 fun Lines (
@@ -111,7 +111,9 @@ fun Lines (
     val heightA =   strokeWidth*2+10.dp
 
     Canvas(
-            modifier = Modifier .width(canvasWidth ).height( heightA )
+            modifier = Modifier
+                .width(canvasWidth)
+                .height(heightA)
    ) {
    drawLine(
                 color = AppColors.mLightGray,
@@ -157,11 +159,13 @@ fun Lines (
 
 
 @Composable
- //@Preview(showBackground = true)
+ @Preview(showBackground = true)
 fun ExercisesIndicator (
-    modifier: Modifier=Modifier
-    ,index: Int=0,listOfExercise:  List  <IntervalsInfo> = ExpTA,
-                        isPlus:Boolean= true,
+    modifier: Modifier=Modifier,
+    visible:Boolean=true ,
+    index: Int=0,
+    listOfExercise :  List  <IntervalsInfo> = ExpTA,
+    isPlus : Boolean= true,
 
                         ){
     val customList = listOfExercise.toMutableList()
@@ -169,77 +173,86 @@ fun ExercisesIndicator (
     customList.add(customList.lastIndex+1,IntervalsInfo(intervalType = "", intervalDuration = 0, intervalName = "FINISH" ))
     customList.add(customList.lastIndex+1,IntervalsInfo(intervalType = "", intervalDuration = 0, intervalName = "" ))
 
-
-//    Card(modifier = modifier  ,
-//        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-//
-//    ) {
-        Row (modifier = modifier , verticalAlignment = Alignment.CenterVertically
+      Row (modifier = modifier , verticalAlignment = Alignment.CenterVertically
              ){
-            TriangleL(sizeC = 20.dp)
+            if (visible) {
+                TriangleL(sizeC = 20.dp)
+            }
 
 
             Column(modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 2.dp)) {
 
-        AnimatedContent( modifier =Modifier .weight(1f)
-            .fillMaxWidth(),targetState = customList[index ],
-           transitionSpec = {  slideInVertically { if (isPlus) it else if(!isPlus) -it else it } togetherWith slideOutVertically { if (isPlus) -it else if(!isPlus) it else -it  } }
-
-                        , label = "") {
-                            interval  -> IntervalIndicator(index, interval )
+               if(visible) {
+                    AnimatedContent(modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                        targetState = customList[index],
+                        transitionSpec = { slideInVertically { if (isPlus) it else if (!isPlus) -it else it } togetherWith slideOutVertically { if (isPlus) -it else if (!isPlus) it else -it } },
+                        label = "") { interval ->
+                        IntervalIndicator(index, interval)
                     }
+                }
 
-                Card(modifier = Modifier
-                    .height(3.dp)
-                    .fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.Green)
-                ){}
+               if (visible) {
+                    Card(
+                        modifier = Modifier
+                            .height(3.dp)
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color.Green)
+                    ) {}
+                }
 
-                    AnimatedContent(modifier =Modifier .weight(1f)
+                    AnimatedContent(modifier = Modifier
+                        .weight(1f)
                         .fillMaxWidth(), targetState = customList[ index+1 ],
                         transitionSpec = {
                             slideInVertically { if (isPlus) it else if(!isPlus) -it else it } togetherWith slideOutVertically { if (isPlus) -it else if(!isPlus) it else -it  }
 
                         }, label = "") {
-                            interval  -> IntervalIndicator( index+1 ,interval   )
+                            interval  -> IntervalIndicator( index+1 ,interval, visible = visible   )
                     }
 
-                   Card(modifier = Modifier
-                       .height(3.dp)
-                       .fillMaxWidth(),
-                       colors = CardDefaults.cardColors(containerColor = Color.Green)
-                        ){}
-                    AnimatedContent(modifier =Modifier .weight(1f)
-                        .fillMaxWidth(), targetState = customList[index+2],
-                        transitionSpec = { slideInVertically { if (isPlus) it else if(!isPlus) -it else it } togetherWith slideOutVertically { if (isPlus) -it else if(!isPlus) it else -it  }
+                if (visible) {
 
-                        }, label = "") {
-                            interval  -> IntervalIndicator( index+2 ,interval  )
+    Card(modifier= Modifier
+        .height(3.dp)
+        .fillMaxWidth(), colors=CardDefaults.cardColors(containerColor=Color.Green) ) {}
+
+                }
+                if(visible) {
+                    AnimatedContent(modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(), targetState = customList[index + 2],
+                        transitionSpec = {
+   slideInVertically { if (isPlus) it else if (!isPlus) -it else it } togetherWith slideOutVertically { if (isPlus) -it else if (!isPlus) it else -it }
+                  }, label = ""
+                    ) { interval ->
+                        IntervalIndicator(index + 2, interval)
                     }
+                }
 
             }
 
-            TriangleR(sizeC = 20.dp)
+        if (visible) {  TriangleR(sizeC = 20.dp)  }
 
         }
-
-
-   // }
 }
+
 @Composable
  //@Preview
 fun IntervalIndicator(
     index : Int = 0 ,
      interval : IntervalsInfo ,
+    visible: Boolean=true,
     intervalIndicatorHeight:Dp =30.dp
 
 ){
     Card(modifier = Modifier
         .fillMaxSize()
         .padding(vertical = 2.dp)
-         .height(intervalIndicatorHeight)
+        .height(intervalIndicatorHeight)
 
     ) {
 
@@ -251,22 +264,38 @@ fun IntervalIndicator(
         horizontalArrangement = Arrangement.Center
    ){
 
-  Text(modifier = Modifier.weight(0.4f),text =
-                       if (interval.intervalName=="START !!"||interval.intervalName=="FINISH") ""
-                       else if (interval.intervalName=="" && interval.intervalName=="" && interval.intervalDuration==0L )""
-                       else(index ).toString()
-      ,
-      textAlign = TextAlign.Center  , color = Color.White  , overflow = TextOverflow.Ellipsis, maxLines = 1, fontSize = 20.sp)
+       if (visible) {
+           Text(
+               modifier = Modifier.weight(0.4f),
+               text =
+               if (interval.intervalName == "START !!" || interval.intervalName == "FINISH") ""
+               else if (interval.intervalName == "" && interval.intervalName == "" && interval.intervalDuration == 0L) ""
+               else (index).toString(),
+               textAlign = TextAlign.Center,
+               color = Color.White,
+               overflow = TextOverflow.Ellipsis,
+               maxLines = 1,
+               fontSize = 20.sp
+           )
+       }
 
     Text(modifier = Modifier.weight(1f),
         text = interval.intervalName.ifEmpty { interval.intervalType }
                , textAlign = TextAlign.Center, color = Color.White , overflow = TextOverflow.Ellipsis, maxLines = 1 , fontSize = 20.sp  )
 
-   Text(modifier = Modifier.weight(0.4f),
-           text  = if(interval.intervalDuration==0L) ""
-           else if (interval.intervalName=="" && interval.intervalName==""&&interval.intervalDuration==0L )""
-                   else  formatToMMSS( interval.intervalDuration )
-       , textAlign = TextAlign.Center  ,color = Color.White, overflow = TextOverflow.Ellipsis, maxLines = 1 , fontSize = 20.sp)
+       if (visible) {
+           Text(
+               modifier = Modifier.weight(0.4f),
+               text = if (interval.intervalDuration == 0L) ""
+               else if (interval.intervalName == "" && interval.intervalName == "" && interval.intervalDuration == 0L) ""
+               else formatToMMSS(interval.intervalDuration),
+               textAlign = TextAlign.Center,
+               color = Color.White,
+               overflow = TextOverflow.Ellipsis,
+               maxLines = 1,
+               fontSize = 20.sp
+           )
+       }
     }
 }
 

@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -82,11 +83,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.navOptions
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import my.destinyStudio.firetimer.R
 import my.destinyStudio.firetimer.components.IntervalsType
 import my.destinyStudio.firetimer.data.ExercisesViewModel
+import my.destinyStudio.firetimer.navigation.ImageScreen
+import my.destinyStudio.firetimer.navigation.StartScreen
+import my.destinyStudio.firetimer.screens.settingScreen.SettingsViewModel
 import my.destinyStudio.firetimer.ui.theme.AppColors
 import my.destinyStudio.firetimer.utils.generateImageWorkoutA
 import java.io.File
@@ -97,9 +103,10 @@ import my.destinyStudio.firetimer.components.TimePickerCard as TimePickerCard1
 @Composable
 //@Preview
 fun ImagesScreen(
-
- imageDataViewmodel : ImageDataViewmodel = viewModel(),
- exercisesViewModel: ExercisesViewModel= viewModel()
+navController: NavController,
+    imageDataViewmodel: ImageDataViewmodel = viewModel(),
+    exercisesViewModel: ExercisesViewModel = viewModel(),
+    settingViewmodel: SettingsViewModel
 ){
     val internalStorageImageFiles by imageDataViewmodel.internalStorageImageFiles.collectAsState()
     val selectedImages by imageDataViewmodel.selectedImageFile.collectAsState()
@@ -107,6 +114,21 @@ fun ImagesScreen(
         var selectedImageUris by remember { mutableStateOf<MutableList<Uri>>(mutableListOf()) }
 
         val context = LocalContext.current
+
+
+    // if(!it) {settingViewmodel.updateCall(it)}
+//            else if(it){
+//                launcher.launch(Manifest.permission.READ_PHONE_STATE)
+//
+//                      if( callStateGranted ){
+//          settingViewmodel.updateCall(it)
+//
+//           }else if( !callStateGranted ){
+//                         settingViewmodel.updateCall(false)
+//                                }
+//
+//            }
+
         val launcher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -126,6 +148,13 @@ fun ImagesScreen(
     var nameChange by rememberSaveable { mutableStateOf(false) }
     var createWorkout by rememberSaveable { mutableStateOf(false) }
     var selectedI by rememberSaveable { mutableStateOf<File?>( null) }
+
+    BackHandler  {
+        settingViewmodel.indexPage(2)
+        navController.navigate(StartScreen , navOptions { popUpTo(ImageScreen){inclusive=true} })
+
+       Log.d("Screens","BackHandler Images  ")
+    }
 
 
     LaunchedEffect(Unit ) {
@@ -155,7 +184,24 @@ imageDataViewmodel.renameFileInInternalStorage(context = context, oldFileName = 
     }
 
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
+//                .pointerInput(Unit) {
+//                detectHorizontalDragGestures { change, dragAmount ->
+//
+//                    if (abs(dragAmount) > 10) { // threshold to avoid accidental swipes
+//                         when {
+//                            dragAmount > 0 ->navController.navigate(StartScreen,
+//                                navOptions { popUpTo(ImageScreen){inclusive=true} } ) // Swipe left (to the right in the list of enums)
+//                            dragAmount < 0 ->navController.navigate(SettingScreen,
+//                                navOptions { popUpTo(ImageScreen){inclusive=true} }) // Swipe right (to the left in the list of enums)
+//                            else ->   {}
+//                        }
+//
+//
+//                    }
+//                }
+//            }
+            ,
  floatingActionButton = {
      FloatingActionButton(
          modifier = Modifier

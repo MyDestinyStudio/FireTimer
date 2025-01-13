@@ -1,5 +1,6 @@
 package my.destinyStudio.firetimer.data
 
+
 import java.util.UUID
 
 
@@ -9,6 +10,9 @@ data class  IntervalsInfo(
             val  intervalName:String,
             val uri : String? = null
 )
+
+
+
 
 
 
